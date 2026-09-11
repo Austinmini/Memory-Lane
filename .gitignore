@@ -1,35 +1,41 @@
-# Node modules & package manager
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
 
 # Expo
 .expo/
-web-build/
 dist/
+web-build/
+expo-env.d.ts
 
-# Native build artifacts & directories
-android/
-ios/
-
-# Keystores & sensitive credentials
+# Native
+.kotlin/
+*.orig.*
 *.jks
-*.keystore
 *.p8
 *.p12
 *.key
 *.mobileprovision
 
-# Environment variables & local configuration
-.env
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
 .env*.local
 
-# OS / Editor artifacts
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-.vscode/
-.idea/
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android
