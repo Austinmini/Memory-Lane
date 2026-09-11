@@ -161,8 +161,9 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
   - **Files**: `package.json`, `app.json`, `tsconfig.json`, `App.tsx`
   - **Scope**: Run `npx.cmd -y create-expo-app@latest . --template blank-typescript`. Configure `app.json` for Android package (`com.memorylane.carecompanion`) with zero-friction permissions (`POST_NOTIFICATIONS` only).
   - **Git Checkpoint**: `git commit -m "chore: scaffold expo typescript project with play store safe config"`
-- **Phase 1B: Dementia-Accessible Design System**
-  - **Files**: `src/constants/colors.ts`, `src/constants/typography.ts`
+- **[COMPLETED] Phase 1B: Dementia-Accessible Design System**
+  - **Status**: Completed (Commit `664f854`)
+  - **Files**: `src/constants/colors.ts`, `src/constants/typography.ts`, `src/constants/index.ts`
   - **Scope**: Define calming, high-contrast color tokens (Sage Green, warm cream, soft navy text) and large font scalings (22pt+ minimum touch sizes) meeting WCAG AAA contrast standards.
   - **Git Checkpoint**: `git commit -m "feat(ui): add dementia-friendly color palette and typography tokens"`
 
