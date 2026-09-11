@@ -156,8 +156,9 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
 ---
 
 ### Phase 1: Expo Scaffolding & Design Foundation
-- **Phase 1A: Project Initialization & Configuration**
-  - **Files**: `package.json`, `app.json`, `tsconfig.json`
+- **[COMPLETED] Phase 1A: Project Initialization & Configuration**
+  - **Status**: Completed (Commit `5d70b65`)
+  - **Files**: `package.json`, `app.json`, `tsconfig.json`, `App.tsx`
   - **Scope**: Run `npx.cmd -y create-expo-app@latest . --template blank-typescript`. Configure `app.json` for Android package (`com.memorylane.carecompanion`) with zero-friction permissions (`POST_NOTIFICATIONS` only).
   - **Git Checkpoint**: `git commit -m "chore: scaffold expo typescript project with play store safe config"`
 - **Phase 1B: Dementia-Accessible Design System**
