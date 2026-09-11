@@ -175,12 +175,14 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
   - **Files**: `src/db/database.ts`, `src/db/types.ts`, `src/db/index.ts`, `package.json`, `app.json`
   - **Scope**: Install `expo-sqlite`. Create initialization routine that opens/creates the local SQLite database and runs table creation queries for `memories` and `reminders`.
   - **Git Checkpoint**: `git commit -m "feat(db): initialize local sqlite database and tables"`
-- **Phase 2B: Repositories & Comforting Seed Data**
-  - **Files**: `src/db/memoryRepository.ts`, `src/db/reminderRepository.ts`, `src/constants/defaultData.ts`
+- **[COMPLETED] Phase 2B: Repositories & Comforting Seed Data**
+  - **Status**: Completed (Commit `97bb74c`)
+  - **Files**: `src/db/memoryRepository.ts`, `src/db/reminderRepository.ts`, `src/constants/defaultData.ts`, `src/constants/index.ts`, `src/db/index.ts`
   - **Scope**: CRUD operations for memories and reminders. Add initial seed data (e.g. sample family memory and gentle daily routine templates) so the app is immediately useful out-of-the-box.
   - **Git Checkpoint**: `git commit -m "feat(db): add memory and reminder repositories with default seed data"`
-- **Phase 2C: Local Sandbox File Storage**
-  - **Files**: `src/services/imageService.ts`
+- **[COMPLETED] Phase 2C: Local Sandbox File Storage**
+  - **Status**: Completed (Commit `7815505`)
+  - **Files**: `src/services/imageService.ts`, `src/services/index.ts`, `package.json`
   - **Scope**: Install `expo-file-system`. Implement helper to copy user-selected photos from temporary cache directly into persistent app document directory (`FileSystem.documentDirectory/memories/`).
   - **Git Checkpoint**: `git commit -m "feat(storage): add local image persistence service"`
 
