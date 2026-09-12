@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Colors, Typography, Spacing, Radius } from './src/constants';
 import { MemoryRepository, ReminderRepository, MemoryRecord, ReminderRecord } from './src/db';
-import { ensureMemoriesDirectoryExists } from './src/services';
+import { ensureMemoriesDirectoryExists, speakCalmly, speakMemory, stopSpeaking } from './src/services';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -96,11 +96,27 @@ export default function App() {
         <View style={styles.header}>
           <Text style={[Typography.h1, { color: Colors.primary }]}>Memory Lane</Text>
           <Text style={[Typography.bodyMediumBold, { color: Colors.textSecondary, marginTop: Spacing.xs }]}>
-            Phase 2 Verification Dashboard
+            Phase 3A Verification Dashboard
           </Text>
           <Text style={[Typography.caption, { color: Colors.textMuted }]}>
-            Local SQLite & Sandbox Storage Active
+            Local SQLite, Sandbox Storage & Calming Speech (TTS) Active
           </Text>
+          <View style={{ flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.md }}>
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: Colors.primary }]}
+              onPress={() => speakCalmly('Hello. Welcome back to Memory Lane. Today is a peaceful day.')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.actionButtonText}>🔊 Test Calming Voice</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: Colors.textMuted }]}
+              onPress={() => stopSpeaking()}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.actionButtonText}>⏹ Stop</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {loading ? (
@@ -141,8 +157,19 @@ export default function App() {
 
               {memories.map((m) => (
                 <View key={m.id} style={styles.memoryItem}>
-                  <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{m.relationship}</Text>
+                  <View style={styles.rowBetween}>
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>{m.relationship}</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={[styles.miniButton, { backgroundColor: Colors.surfaceElevated, borderColor: Colors.border }]}
+                      onPress={() => speakMemory(m.title, m.relationship, m.story)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[Typography.caption, { color: Colors.primary, fontWeight: '700' }]}>
+                        🔊 Read Aloud
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                   <Text style={[Typography.bodyLarge, { color: Colors.textPrimary, fontWeight: '700' }]}>
                     {m.title}
@@ -179,20 +206,31 @@ export default function App() {
                       <Text style={[Typography.h3, { color: Colors.primary }]}>
                         ⏰ {r.timeOfDay}
                       </Text>
-                      <View
-                        style={[
-                          styles.statusPill,
-                          { backgroundColor: isDone ? Colors.success : Colors.borderLight },
-                        ]}
-                      >
-                        <Text
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+                        <TouchableOpacity
+                          style={[styles.miniButton, { backgroundColor: Colors.surfaceElevated, borderColor: Colors.border }]}
+                          onPress={() => speakCalmly(r.spokenMessage)}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={[Typography.caption, { color: Colors.primary, fontWeight: '700' }]}>
+                            🔊 Listen
+                          </Text>
+                        </TouchableOpacity>
+                        <View
                           style={[
-                            Typography.badge,
-                            { color: isDone ? Colors.textInverse : Colors.textSecondary },
+                            styles.statusPill,
+                            { backgroundColor: isDone ? Colors.success : Colors.borderLight },
                           ]}
                         >
-                          {isDone ? '✓ Completed' : 'Pending'}
-                        </Text>
+                          <Text
+                            style={[
+                              Typography.badge,
+                              { color: isDone ? Colors.textInverse : Colors.textSecondary },
+                            ]}
+                          >
+                            {isDone ? '✓ Completed' : 'Pending'}
+                          </Text>
+                        </View>
                       </View>
                     </View>
 
@@ -278,6 +316,12 @@ const styles = StyleSheet.create({
     color: Colors.textInverse,
     fontWeight: '700',
     fontSize: 15,
+  },
+  miniButton: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: Radius.sm,
+    borderWidth: 1,
   },
   memoryItem: {
     paddingVertical: Spacing.md,
