@@ -138,7 +138,15 @@ Memory Lane/
 
 ## Step-by-Step Implementation Roadmap (Bite-Sized & Context-Optimized)
 
-To keep within chat context limits in Antigravity IDE and ensure rock-solid stability, each phase is broken down into small, self-contained micro-tasks touching only 1–2 files at a time. Each micro-step ends with a verification check and an incremental Git commit.
+To keep within chat context limits in Antigravity IDE and ensure rock-solid stability, each phase is broken down into small, self-contained micro-tasks touching only 1–2 files at a time. 
+
+> [!IMPORTANT]
+> **Continuous Remote Synchronization Protocol**:
+> For **every single sub-phase** upon completion:
+> 1. Run static analysis & typecheck (`npx.cmd tsc --noEmit`).
+> 2. Create an incremental Git commit with the designated message format.
+> 3. Push the commit directly to the remote GitHub repository (`git push origin main`).
+> 4. Mark the sub-phase status as `[COMPLETED]` with commit hash in this implementation plan.
 
 ---
 
@@ -157,50 +165,51 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
 
 ### Phase 1: Expo Scaffolding & Design Foundation
 - **[COMPLETED] Phase 1A: Project Initialization & Configuration**
-  - **Status**: Completed (Commit `5d70b65`)
+  - **Status**: Completed (Commit `5d70b65`, pushed to `origin/main`)
   - **Files**: `package.json`, `app.json`, `tsconfig.json`, `App.tsx`
   - **Scope**: Run `npx.cmd -y create-expo-app@latest . --template blank-typescript`. Configure `app.json` for Android package (`com.memorylane.carecompanion`) with zero-friction permissions (`POST_NOTIFICATIONS` only).
-  - **Git Checkpoint**: `git commit -m "chore: scaffold expo typescript project with play store safe config"`
+  - **Git Checkpoint**: `git commit -m "chore: scaffold expo typescript project with play store safe config" && git push origin main`
 - **[COMPLETED] Phase 1B: Dementia-Accessible Design System**
-  - **Status**: Completed (Commit `664f854`)
+  - **Status**: Completed (Commit `664f854`, pushed to `origin/main`)
   - **Files**: `src/constants/colors.ts`, `src/constants/typography.ts`, `src/constants/index.ts`
   - **Scope**: Define calming, high-contrast color tokens (Sage Green, warm cream, soft navy text) and large font scalings (22pt+ minimum touch sizes) meeting WCAG AAA contrast standards.
-  - **Git Checkpoint**: `git commit -m "feat(ui): add dementia-friendly color palette and typography tokens"`
+  - **Git Checkpoint**: `git commit -m "feat(ui): add dementia-friendly color palette and typography tokens" && git push origin main`
 
 ---
 
 ### Phase 2: Local Database & Storage Layer
 - **[COMPLETED] Phase 2A: Database Initialization & Schema**
-  - **Status**: Completed (Commit `eb81745`)
+  - **Status**: Completed (Commit `eb81745`, pushed to `origin/main`)
   - **Files**: `src/db/database.ts`, `src/db/types.ts`, `src/db/index.ts`, `package.json`, `app.json`
   - **Scope**: Install `expo-sqlite`. Create initialization routine that opens/creates the local SQLite database and runs table creation queries for `memories` and `reminders`.
-  - **Git Checkpoint**: `git commit -m "feat(db): initialize local sqlite database and tables"`
+  - **Git Checkpoint**: `git commit -m "feat(db): initialize local sqlite database and tables" && git push origin main`
 - **[COMPLETED] Phase 2B: Repositories & Comforting Seed Data**
-  - **Status**: Completed (Commit `97bb74c`)
+  - **Status**: Completed (Commit `97bb74c`, pushed to `origin/main`)
   - **Files**: `src/db/memoryRepository.ts`, `src/db/reminderRepository.ts`, `src/constants/defaultData.ts`, `src/constants/index.ts`, `src/db/index.ts`
   - **Scope**: CRUD operations for memories and reminders. Add initial seed data (e.g. sample family memory and gentle daily routine templates) so the app is immediately useful out-of-the-box.
-  - **Git Checkpoint**: `git commit -m "feat(db): add memory and reminder repositories with default seed data"`
+  - **Git Checkpoint**: `git commit -m "feat(db): add memory and reminder repositories with default seed data" && git push origin main`
 - **[COMPLETED] Phase 2C: Local Sandbox File Storage**
-  - **Status**: Completed (Commit `7815505`)
+  - **Status**: Completed (Commit `7815505`, pushed to `origin/main`)
   - **Files**: `src/services/imageService.ts`, `src/services/index.ts`, `package.json`
   - **Scope**: Install `expo-file-system`. Implement helper to copy user-selected photos from temporary cache directly into persistent app document directory (`FileSystem.documentDirectory/memories/`).
-  - **Git Checkpoint**: `git commit -m "feat(storage): add local image persistence service"`
+  - **Git Checkpoint**: `git commit -m "feat(storage): add local image persistence service" && git push origin main`
 
 ---
 
 ### Phase 3: Memory Carousel Feature
-- **Phase 3A: Soothing Voice / Speech Service**
-  - **Files**: `src/services/speechService.ts`
-  - **Scope**: Install `expo-speech`. Configure calm, slower-cadence English voice synthesis (`rate: 0.85`, comforting pitch) for reading memory stories and instructions.
-  - **Git Checkpoint**: `git commit -m "feat(speech): implement gentle english text-to-speech service"`
+- **[COMPLETED] Phase 3A: Soothing Voice / Speech Service**
+  - **Status**: Completed (Commit `5341375`, pushed to `origin/main`)
+  - **Files**: `src/services/speechService.ts`, `src/services/index.ts`, `package.json`, `App.tsx`
+  - **Scope**: Install `expo-speech`. Configure calm, slower-cadence English voice synthesis (`rate: 0.85`, comforting pitch) for reading memory stories and instructions. Includes formatted memory readouts, playback control, and active speech checking.
+  - **Git Checkpoint**: `git commit -m "feat(speech): implement gentle english text-to-speech service (Phase 3A)" && git push origin main`
 - **Phase 3B: Memory Carousel Component**
   - **Files**: `src/components/MemoryCarousel.tsx`
   - **Scope**: Build horizontal paging carousel with large Next/Previous buttons, prominent photo display, relationship badge, and a one-tap "Listen" button triggering speech readout. Includes an optional slow auto-advance toggle.
-  - **Git Checkpoint**: `git commit -m "feat(ui): create accessible memory carousel with voice narration"`
+  - **Git Checkpoint**: `git commit -m "feat(ui): create accessible memory carousel with voice narration (Phase 3B)" && git push origin main`
 - **Phase 3C: Caregiver Add/Edit Memory Screen**
   - **Files**: `src/screens/EditMemoryScreen.tsx`
   - **Scope**: Install `expo-image-picker` (using modern system Photo Picker that requires 0 dangerous permissions). Allow caregiver to pick photo, enter person's name, relationship, and short memory story.
-  - **Git Checkpoint**: `git commit -m "feat(screens): add caregiver photo upload and memory editor"`
+  - **Git Checkpoint**: `git commit -m "feat(screens): add caregiver photo upload and memory editor (Phase 3C)" && git push origin main`
 
 ---
 
@@ -208,19 +217,19 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
 - **Phase 4A: Safe Local Notification Scheduling**
   - **Files**: `src/services/notificationService.ts`
   - **Scope**: Install `expo-notifications`. Configure permissible scheduled notifications (avoiding restricted `USE_EXACT_ALARM`) for daily routine items (Meds, Meals, Hydration, Calls).
-  - **Git Checkpoint**: `git commit -m "feat(notifications): add safe local notification scheduling service"`
+  - **Git Checkpoint**: `git commit -m "feat(notifications): add safe local notification scheduling service (Phase 4A)" && git push origin main`
 - **Phase 4B: Orientation Header & Daily Reminder Cards**
   - **Files**: `src/components/HeaderTimeWidget.tsx`, `src/components/ReminderCard.tsx`
   - **Scope**: Build clear orientation widget (e.g. *"Today is Thursday Morning, September 11"*) and large reminder cards with "Done" checkbox and "Listen" audio button.
-  - **Git Checkpoint**: `git commit -m "feat(ui): add time orientation widget and reminder cards"`
+  - **Git Checkpoint**: `git commit -m "feat(ui): add time orientation widget and reminder cards (Phase 4B)" && git push origin main`
 - **Phase 4C: In-App Voice Reminder Alert Modal**
   - **Files**: `src/components/VoicePromptModal.tsx`
   - **Scope**: High-contrast, gentle pop-up modal when a reminder triggers, automatically announcing the reminder out loud in English with large "Acknowledge" button.
-  - **Git Checkpoint**: `git commit -m "feat(ui): add voice prompt alert modal for active reminders"`
+  - **Git Checkpoint**: `git commit -m "feat(ui): add voice prompt alert modal for active reminders (Phase 4C)" && git push origin main`
 - **Phase 4D: Caregiver Add/Edit Reminder Screen**
   - **Files**: `src/screens/EditReminderScreen.tsx`
   - **Scope**: Screen with quick-pick templates (Meds, Lunch, Water, Call Loved One) or custom reminders with time picker and spoken text preview.
-  - **Git Checkpoint**: `git commit -m "feat(screens): add caregiver reminder editor with routine templates"`
+  - **Git Checkpoint**: `git commit -m "feat(screens): add caregiver reminder editor with routine templates (Phase 4D)" && git push origin main`
 
 ---
 
@@ -228,11 +237,11 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
 - **Phase 5A: Patient Home Screen & Caregiver Lock**
   - **Files**: `src/screens/PatientHomeScreen.tsx`, `src/components/CaregiverLockModal.tsx`
   - **Scope**: Assemble serene patient view containing the orientation header, memory carousel, and today's schedule. Add discreet long-press lock or PIN to enter Caregiver Mode.
-  - **Git Checkpoint**: `git commit -m "feat(screens): assemble serene patient home screen with caregiver lock"`
+  - **Git Checkpoint**: `git commit -m "feat(screens): assemble serene patient home screen with caregiver lock (Phase 5A)" && git push origin main`
 - **Phase 5B: Caregiver Dashboard & Main App Root**
   - **Files**: `src/screens/CaregiverDashboardScreen.tsx`, `App.tsx`
   - **Scope**: Caregiver control panel to manage all memories, view/edit reminders, and toggle settings. Hook up navigation in `App.tsx`.
-  - **Git Checkpoint**: `git commit -m "feat: complete caregiver dashboard and app navigation"`
+  - **Git Checkpoint**: `git commit -m "feat: complete caregiver dashboard and app navigation (Phase 5B)" && git push origin main`
 
 ---
 
@@ -240,11 +249,11 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
 - **Phase 6A: Privacy Policy & Data Safety Document**
   - **Files**: `PRIVACY_POLICY.md`
   - **Scope**: Complete privacy policy documenting 100% on-device offline storage, zero tracking, zero cloud data transfer, ready to host on GitHub Pages for Play Store listing.
-  - **Git Checkpoint**: `git commit -m "docs: add play store compliant zero-data-collection privacy policy"`
+  - **Git Checkpoint**: `git commit -m "docs: add play store compliant zero-data-collection privacy policy (Phase 6A)" && git push origin main`
 - **Phase 6B: Store Assets & Final Verification Audit**
   - **Files**: `assets/icon.png`, `assets/adaptive-icon.png`, `assets/splash.png`
   - **Scope**: Verify icons, run TypeScript validation (`tsc --noEmit`), and execute `npx expo prebuild --clean` dry-run to audit generated `AndroidManifest.xml` for zero unauthorized permissions.
-  - **Git Checkpoint**: `git commit -m "chore: verify store assets and finalize play store prebuild audit"`
+  - **Git Checkpoint**: `git commit -m "chore: verify store assets and finalize play store prebuild audit (Phase 6B)" && git push origin main`
 
 
 ---
