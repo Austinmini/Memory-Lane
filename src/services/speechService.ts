@@ -87,7 +87,7 @@ export async function speakMemory(
   title: string,
   relationship?: string | null,
   story?: string | null,
-  callbacks?: { onStart?: () => void; onDone?: () => void; onError?: (err: any) => void }
+  callbacks?: { onStart?: () => void; onDone?: () => void; onStopped?: () => void; onError?: (err: any) => void }
 ): Promise<void> {
   const narrative = formatMemoryNarration(title, relationship, story);
   await speakCalmly(narrative, callbacks);

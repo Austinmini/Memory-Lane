@@ -12,6 +12,7 @@ import {
 import { Colors, Typography, Spacing, Radius } from './src/constants';
 import { MemoryRepository, ReminderRepository, MemoryRecord, ReminderRecord } from './src/db';
 import { ensureMemoriesDirectoryExists, speakCalmly, speakMemory, stopSpeaking } from './src/services';
+import { MemoryCarousel } from './src/components';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -140,11 +141,11 @@ export default function App() {
               ))}
             </View>
 
-            {/* Memories Section */}
+            {/* Memory Carousel Component (Phase 3B) */}
             <View style={styles.sectionCard}>
               <View style={styles.rowBetween}>
                 <Text style={[Typography.h2, { color: Colors.primary }]}>
-                  Memories ({memories.length})
+                  Memory Carousel
                 </Text>
                 <TouchableOpacity
                   style={styles.actionButton}
@@ -153,6 +154,20 @@ export default function App() {
                 >
                   <Text style={styles.actionButtonText}>+ Add Memory</Text>
                 </TouchableOpacity>
+              </View>
+              <Text style={[Typography.caption, { color: Colors.textMuted, marginTop: Spacing.xs, marginBottom: Spacing.sm }]}>
+                Dementia-friendly large cards with voice narration, auto-slideshow, and high contrast.
+              </Text>
+
+              <MemoryCarousel memories={memories} />
+            </View>
+
+            {/* Memories List */}
+            <View style={styles.sectionCard}>
+              <View style={styles.rowBetween}>
+                <Text style={[Typography.h2, { color: Colors.primary }]}>
+                  All Memories in SQLite ({memories.length})
+                </Text>
               </View>
 
               {memories.map((m) => (
