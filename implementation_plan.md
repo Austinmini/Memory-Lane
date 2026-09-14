@@ -143,22 +143,28 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
 > [!IMPORTANT]
 > **MANDATORY PROTOCOL: Continuous Remote Synchronization & Plan Completion Checklist**
 >
-> For **EVERY upcoming phase and sub-phase**, the following 5-step sequence is strictly mandatory before declaring the phase finished:
+> For **EVERY upcoming phase and sub-phase**, the following sequence is strictly mandatory before declaring the phase finished:
 > 1. **Static Validation**: Run `npx.cmd tsc --noEmit` and confirm zero TypeScript / build errors.
 > 2. **Code Commit & Push**: Stage the phase code changes, commit with the designated message, and push immediately to GitHub:
->    ```bash
+>    ```powershell
 >    git add <files...>
 >    git commit -m "<designated checkpoint message>"
 >    git push origin main
 >    ```
-> 3. **Plan Update**: In `implementation_plan.md`, update the phase header to `[COMPLETED]`, record the commit hash, and note `pushed to origin/main`.
-> 4. **Plan Commit & Push**: Commit the updated `implementation_plan.md` and push it directly to GitHub:
->    ```bash
+> 3. **Plan Update**: In `implementation_plan.md`, mark the phase as `[COMPLETED]`, record the commit hash, and note `pushed to origin/main`.
+> 4. **Plan Check-In (Commit)**: Check in the modified `implementation_plan.md` into Git:
+>    ```powershell
 >    git add implementation_plan.md
 >    git commit -m "docs: mark <Phase Name> completed in implementation plan"
+>    ```
+> 5. **Remote Push Plan**: Push the checked-in implementation plan commit to GitHub:
+>    ```powershell
 >    git push origin main
 >    ```
-> 5. **Confirmation**: Confirm the remote repository is in sync (`git status` shows working tree clean and up to date with `origin/main`).
+> 6. **Verification & Status Confirmation**: Confirm the remote repository is fully synchronized and clean:
+>    ```powershell
+>    git status # Must show: "Your branch is up to date with 'origin/main'", "nothing to commit, working tree clean"
+>    ```
 
 ---
 
