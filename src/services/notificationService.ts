@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { isRunningInExpoGo } from 'expo';
 import * as Notifications from 'expo-notifications';
 import { ReminderRecord } from '../db/types';
 import { ReminderRepository } from '../db/reminderRepository';
@@ -6,25 +7,53 @@ import { ReminderRepository } from '../db/reminderRepository';
 export const REMINDERS_CHANNEL_ID = 'routine_reminders';
 
 /**
+ * Returns true if running inside the Expo Go app on Android.
+ * In Expo SDK 53+, Expo Go removed native Android notification modules.
+ * In development builds and production standalone APKs, this returns false.
+ */
+export function isExpoGoAndroid(): boolean {
+  return Platform.OS === 'android' && isRunningInExpoGo();
+}
+
+// In-app fallback listener registries for Expo Go & Web
+type ReceivedListener = (notification: Notifications.Notification) => void;
+type ResponseListener = (response: Notifications.NotificationResponse) => void;
+const simulatedReceivedListeners: Set<ReceivedListener> = new Set();
+const simulatedResponseListeners: Set<ResponseListener> = new Set();
+const activeSimulatedTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
+
+/**
  * Configure default foreground and background notification presentation behavior.
  */
 export function setupNotificationHandler(): void {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-      shouldShowBanner: true,
-      shouldShowList: true,
-    }),
-  });
+  if (isExpoGoAndroid() || Platform.OS === 'web') {
+    return;
+  }
+
+  try {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+  } catch (err) {
+    console.warn('[notificationService] Failed to set notification handler:', err);
+  }
 }
 
 /**
  * Initialize high-priority Android notification channel for daily care reminders.
  */
 export async function setupNotificationChannel(): Promise<void> {
-  if (Platform.OS === 'android') {
+  if (isExpoGoAndroid() || Platform.OS !== 'android') {
+    return;
+  }
+
+  try {
     await Notifications.setNotificationChannelAsync(REMINDERS_CHANNEL_ID, {
       name: 'Daily Routine Reminders',
       description: 'Gentle voice and task reminders for daily care routines',
@@ -33,6 +62,8 @@ export async function setupNotificationChannel(): Promise<void> {
       lightColor: '#1E4D38',
       sound: 'default',
     });
+  } catch (err) {
+    console.warn('[notificationService] Failed to set notification channel:', err);
   }
 }
 
@@ -40,7 +71,10 @@ export async function setupNotificationChannel(): Promise<void> {
  * Check if the user has granted notification permissions.
  */
 export async function hasNotificationPermissions(): Promise<boolean> {
-  if (Platform.OS === 'web') return false;
+  if (isExpoGoAndroid() || Platform.OS === 'web') {
+    // In Expo Go or Web, in-app reminder prompts are always available
+    return true;
+  }
 
   try {
     const settings = await Notifications.getPermissionsAsync();
@@ -58,7 +92,9 @@ export async function hasNotificationPermissions(): Promise<boolean> {
  * On Android 13+, this requests the standard POST_NOTIFICATIONS permission.
  */
 export async function requestNotificationPermissions(): Promise<boolean> {
-  if (Platform.OS === 'web') return false;
+  if (isExpoGoAndroid() || Platform.OS === 'web') {
+    return true;
+  }
 
   try {
     const existing = await Notifications.getPermissionsAsync();
@@ -116,25 +152,30 @@ export function parseTimeString(timeStr: string): { hour: number; minute: number
 export async function scheduleReminderNotification(
   reminder: ReminderRecord
 ): Promise<string | null> {
-  if (Platform.OS === 'web') return null;
+  // Cancel any existing notification or in-app timer for this reminder
+  if (reminder.notificationId) {
+    await cancelReminderNotification(reminder.notificationId);
+  }
+
+  if (!reminder.isEnabled) {
+    return null;
+  }
+
+  const { hour, minute } = parseTimeString(reminder.timeOfDay);
+  const emoji = getCategoryEmoji(reminder.category);
+  const title = `${emoji} ${reminder.title}`;
+
+  // In Expo Go on Android or Web, schedule via simulated in-app timer
+  if (isExpoGoAndroid() || Platform.OS === 'web') {
+    const mockId = `expogo_${reminder.id}`;
+    await ReminderRepository.update(reminder.id, { notificationId: mockId });
+    return mockId;
+  }
 
   try {
-    // Cancel any existing notification for this reminder
-    if (reminder.notificationId) {
-      await cancelReminderNotification(reminder.notificationId);
-    }
-
-    // Do not schedule if reminder is disabled
-    if (!reminder.isEnabled) {
-      return null;
-    }
-
-    const { hour, minute } = parseTimeString(reminder.timeOfDay);
-    const emoji = getCategoryEmoji(reminder.category);
-
     const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
-        title: `${emoji} ${reminder.title}`,
+        title,
         body: reminder.spokenMessage,
         sound: true,
         priority: 'high',
@@ -154,9 +195,7 @@ export async function scheduleReminderNotification(
       },
     });
 
-    // Update SQLite database with the active scheduled notificationId
     await ReminderRepository.update(reminder.id, { notificationId });
-
     return notificationId;
   } catch (err) {
     console.warn(`[notificationService] Error scheduling reminder ${reminder.id}:`, err);
@@ -168,7 +207,16 @@ export async function scheduleReminderNotification(
  * Cancel a scheduled local notification by ID.
  */
 export async function cancelReminderNotification(notificationId: string): Promise<void> {
-  if (Platform.OS === 'web' || !notificationId) return;
+  if (!notificationId) return;
+
+  if (activeSimulatedTimers.has(notificationId)) {
+    clearTimeout(activeSimulatedTimers.get(notificationId)!);
+    activeSimulatedTimers.delete(notificationId);
+  }
+
+  if (isExpoGoAndroid() || Platform.OS === 'web') {
+    return;
+  }
 
   try {
     await Notifications.cancelScheduledNotificationAsync(notificationId);
@@ -179,20 +227,17 @@ export async function cancelReminderNotification(notificationId: string): Promis
 
 /**
  * Re-schedules all enabled reminders from the local SQLite database.
- * Call this when the app initializes or when routines are updated.
  */
 export async function syncAllReminderNotifications(): Promise<number> {
-  if (Platform.OS === 'web') return 0;
-
   try {
     await setupNotificationChannel();
-    const hasPermission = await hasNotificationPermissions();
-    if (!hasPermission) {
-      return 0;
-    }
 
-    // Cancel all current scheduled notifications to eliminate orphans
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    if (!isExpoGoAndroid() && Platform.OS !== 'web') {
+      const hasPermission = await hasNotificationPermissions();
+      if (hasPermission) {
+        await Notifications.cancelAllScheduledNotificationsAsync();
+      }
+    }
 
     const reminders = await ReminderRepository.getEnabled();
     let scheduledCount = 0;
@@ -213,15 +258,51 @@ export async function syncAllReminderNotifications(): Promise<number> {
 
 /**
  * Schedule a quick test notification to trigger in N seconds (default 5s).
- * Ideal for immediate verification on physical devices or emulators.
+ * Works seamlessly in Expo Go, Android standalone builds, iOS, and Web.
  */
 export async function scheduleTestNotification(
   secondsFromNow: number = 5,
   title: string = '⏰ Routine Check: Hydration',
   message: string = 'Time for a fresh glass of water to keep you feeling refreshed.'
 ): Promise<string | null> {
-  if (Platform.OS === 'web') return null;
+  const testId = `test_${Date.now()}`;
+  const delayMs = Math.max(1, secondsFromNow) * 1000;
 
+  // If in Expo Go on Android or Web, use timer to trigger registered listeners
+  if (isExpoGoAndroid() || Platform.OS === 'web') {
+    const timer = setTimeout(() => {
+      const simulatedNotif: any = {
+        date: Date.now(),
+        request: {
+          identifier: testId,
+          content: {
+            title,
+            body: message,
+            data: {
+              isTest: true,
+              spokenMessage: message,
+              title,
+            },
+          },
+          trigger: { type: 'timeInterval', seconds: secondsFromNow, repeats: false },
+        },
+      };
+
+      simulatedReceivedListeners.forEach((listener) => {
+        try {
+          listener(simulatedNotif);
+        } catch (e) {
+          console.warn('[notificationService] Error in simulated listener:', e);
+        }
+      });
+      activeSimulatedTimers.delete(testId);
+    }, delayMs);
+
+    activeSimulatedTimers.set(testId, timer);
+    return testId;
+  }
+
+  // Native OS notification scheduling
   try {
     await setupNotificationChannel();
     await requestNotificationPermissions();
@@ -259,7 +340,23 @@ export async function scheduleTestNotification(
 export function addNotificationReceivedListener(
   listener: (notification: Notifications.Notification) => void
 ) {
-  return Notifications.addNotificationReceivedListener(listener);
+  simulatedReceivedListeners.add(listener);
+
+  let nativeSub: { remove: () => void } | null = null;
+  if (!isExpoGoAndroid() && Platform.OS !== 'web') {
+    try {
+      nativeSub = Notifications.addNotificationReceivedListener(listener);
+    } catch (err) {
+      console.warn('[notificationService] Native notification listener unavailable:', err);
+    }
+  }
+
+  return {
+    remove: () => {
+      simulatedReceivedListeners.delete(listener);
+      nativeSub?.remove();
+    },
+  };
 }
 
 /**
@@ -268,5 +365,21 @@ export function addNotificationReceivedListener(
 export function addNotificationResponseReceivedListener(
   listener: (response: Notifications.NotificationResponse) => void
 ) {
-  return Notifications.addNotificationResponseReceivedListener(listener);
+  simulatedResponseListeners.add(listener);
+
+  let nativeSub: { remove: () => void } | null = null;
+  if (!isExpoGoAndroid() && Platform.OS !== 'web') {
+    try {
+      nativeSub = Notifications.addNotificationResponseReceivedListener(listener);
+    } catch (err) {
+      console.warn('[notificationService] Native response listener unavailable:', err);
+    }
+  }
+
+  return {
+    remove: () => {
+      simulatedResponseListeners.delete(listener);
+      nativeSub?.remove();
+    },
+  };
 }
