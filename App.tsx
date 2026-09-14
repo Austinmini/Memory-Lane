@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,6 +9,7 @@ import {
   ActivityIndicator,
   Modal,
 } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Typography, Spacing, Radius } from './src/constants';
 import { MemoryRepository, ReminderRepository, MemoryRecord, ReminderRecord } from './src/db';
 import {
@@ -237,21 +237,24 @@ export default function App() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar style="dark" />
-        <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={[Typography.body, { color: Colors.textSecondary, marginTop: Spacing.md }]}>
-            Loading Memory Lane...
-          </Text>
-        </View>
-      </SafeAreaView>
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.safeArea}>
+          <StatusBar style="dark" />
+          <View style={styles.loadingBox}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={[Typography.body, { color: Colors.textSecondary, marginTop: Spacing.md }]}>
+              Loading Memory Lane...
+            </Text>
+          </View>
+        </SafeAreaView>
+      </SafeAreaProvider>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" />
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar style="dark" />
 
       {appMode === 'patient' ? (
         <PatientHomeScreen
@@ -322,7 +325,8 @@ export default function App() {
         onAcknowledge={handleAcknowledgeVoiceModal}
         onDismiss={() => setIsPromptModalVisible(false)}
       />
-    </SafeAreaView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

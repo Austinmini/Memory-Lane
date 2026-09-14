@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -8,6 +7,7 @@ import {
   View,
   RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Typography, Spacing, Radius, TouchTargets } from '../constants';
 import { MemoryRecord, ReminderRecord } from '../db/types';
 import { HeaderTimeWidget } from '../components/HeaderTimeWidget';

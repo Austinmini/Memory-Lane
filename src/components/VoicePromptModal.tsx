@@ -5,9 +5,9 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Typography, Spacing, Radius, TouchTargets } from '../constants';
 import { ReminderRecord } from '../db/types';
 import { speakCalmly, stopSpeaking, isSpeaking } from '../services/speechService';
