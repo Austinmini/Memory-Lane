@@ -141,12 +141,24 @@ Memory Lane/
 To keep within chat context limits in Antigravity IDE and ensure rock-solid stability, each phase is broken down into small, self-contained micro-tasks touching only 1–2 files at a time. 
 
 > [!IMPORTANT]
-> **Continuous Remote Synchronization Protocol**:
-> For **every single sub-phase** upon completion:
-> 1. Run static analysis & typecheck (`npx.cmd tsc --noEmit`).
-> 2. Create an incremental Git commit with the designated message format.
-> 3. Push the commit directly to the remote GitHub repository (`git push origin main`).
-> 4. Mark the sub-phase status as `[COMPLETED]` with commit hash in this implementation plan.
+> **MANDATORY PROTOCOL: Continuous Remote Synchronization & Plan Completion Checklist**
+>
+> For **EVERY upcoming phase and sub-phase**, the following 5-step sequence is strictly mandatory before declaring the phase finished:
+> 1. **Static Validation**: Run `npx.cmd tsc --noEmit` and confirm zero TypeScript / build errors.
+> 2. **Code Commit & Push**: Stage the phase code changes, commit with the designated message, and push immediately to GitHub:
+>    ```bash
+>    git add <files...>
+>    git commit -m "<designated checkpoint message>"
+>    git push origin main
+>    ```
+> 3. **Plan Update**: In `implementation_plan.md`, update the phase header to `[COMPLETED]`, record the commit hash, and note `pushed to origin/main`.
+> 4. **Plan Commit & Push**: Commit the updated `implementation_plan.md` and push it directly to GitHub:
+>    ```bash
+>    git add implementation_plan.md
+>    git commit -m "docs: mark <Phase Name> completed in implementation plan"
+>    git push origin main
+>    ```
+> 5. **Confirmation**: Confirm the remote repository is in sync (`git status` shows working tree clean and up to date with `origin/main`).
 
 ---
 
