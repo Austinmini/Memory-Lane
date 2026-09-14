@@ -254,6 +254,13 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
   - **Files**: `src/screens/EditReminderScreen.tsx`, `src/screens/index.ts`, `App.tsx`
   - **Scope**: Screen with quick-pick templates (Meds, Lunch, Water, Call Loved One) or custom reminders with time picker and spoken text preview. Includes accessible 12-hour AM/PM time selector, daily repeat/active switches, voice narration audition, and instant local notification rescheduling.
   - **Git Checkpoint**: `git commit -m "feat(screens): add caregiver reminder editor with routine templates (Phase 4D)" && git push origin main`
+- **[COMPLETED] Phase 4 Supplement: Expo Go SDK 53+ Compatibility & Local Web Testing Setup**
+  - **Status**: Completed (Commits `8121e9f`, `a7da50f`, `f9934c9`, pushed to `origin/main`)
+  - **Files**: `src/services/notificationService.ts`, `metro.config.js`, `scripts/patch-expo-notifications.js`, `package.json`
+  - **Scope**:
+    1. Safe in-app fallback timers for notification simulation inside Expo Go Android SDK 53+ and Web (`Platform.OS === 'web'`).
+    2. Patch script `scripts/patch-expo-notifications.js` wired to `postinstall` in `package.json` to swap top-level `requireNativeModule` calls to `requireOptionalNativeModule` with safe JS fallbacks for missing push modules (`ExpoTopicSubscriptionModule`, `ExpoPushTokenManager`, `NotificationsServerRegistrationModule`).
+    3. Web platform bundling support with `.wasm` Metro asset resolvers for `expo-sqlite`. Both Android and Web bundles verified compiling with `HTTP 200 OK`.
 
 ---
 
