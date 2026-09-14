@@ -202,8 +202,9 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
   - **Files**: `src/services/speechService.ts`, `src/services/index.ts`, `package.json`, `App.tsx`
   - **Scope**: Install `expo-speech`. Configure calm, slower-cadence English voice synthesis (`rate: 0.85`, comforting pitch) for reading memory stories and instructions. Includes formatted memory readouts, playback control, and active speech checking.
   - **Git Checkpoint**: `git commit -m "feat(speech): implement gentle english text-to-speech service (Phase 3A)" && git push origin main`
-- **Phase 3B: Memory Carousel Component**
-  - **Files**: `src/components/MemoryCarousel.tsx`
+- **[COMPLETED] Phase 3B: Memory Carousel Component**
+  - **Status**: Completed (Commit `b0581fd`, pushed to `origin/main`)
+  - **Files**: `src/components/MemoryCarousel.tsx`, `src/components/index.ts`, `src/services/speechService.ts`, `App.tsx`
   - **Scope**: Build horizontal paging carousel with large Next/Previous buttons, prominent photo display, relationship badge, and a one-tap "Listen" button triggering speech readout. Includes an optional slow auto-advance toggle.
   - **Git Checkpoint**: `git commit -m "feat(ui): create accessible memory carousel with voice narration (Phase 3B)" && git push origin main`
 - **Phase 3C: Caregiver Add/Edit Memory Screen**
