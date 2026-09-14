@@ -249,9 +249,10 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
   - **Files**: `src/components/VoicePromptModal.tsx`, `src/components/index.ts`, `App.tsx`
   - **Scope**: High-contrast, gentle pop-up modal when a reminder triggers, automatically announcing the reminder out loud in English with large "Acknowledge" button. Includes category icons, auto-speech trigger, replay audio option, and 68dp confirmation target.
   - **Git Checkpoint**: `git commit -m "feat(ui): add voice prompt alert modal for active reminders (Phase 4C)" && git push origin main`
-- **Phase 4D: Caregiver Add/Edit Reminder Screen**
-  - **Files**: `src/screens/EditReminderScreen.tsx`
-  - **Scope**: Screen with quick-pick templates (Meds, Lunch, Water, Call Loved One) or custom reminders with time picker and spoken text preview.
+- **[COMPLETED] Phase 4D: Caregiver Add/Edit Reminder Screen**
+  - **Status**: Completed (Commit `a8a7df3`, pushed to `origin/main`)
+  - **Files**: `src/screens/EditReminderScreen.tsx`, `src/screens/index.ts`, `App.tsx`
+  - **Scope**: Screen with quick-pick templates (Meds, Lunch, Water, Call Loved One) or custom reminders with time picker and spoken text preview. Includes accessible 12-hour AM/PM time selector, daily repeat/active switches, voice narration audition, and instant local notification rescheduling.
   - **Git Checkpoint**: `git commit -m "feat(screens): add caregiver reminder editor with routine templates (Phase 4D)" && git push origin main`
 
 ---
