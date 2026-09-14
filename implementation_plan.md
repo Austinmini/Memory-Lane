@@ -225,9 +225,10 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
   - **Files**: `src/components/MemoryCarousel.tsx`, `src/components/index.ts`, `src/services/speechService.ts`, `App.tsx`
   - **Scope**: Build horizontal paging carousel with large Next/Previous buttons, prominent photo display, relationship badge, and a one-tap "Listen" button triggering speech readout. Includes an optional slow auto-advance toggle.
   - **Git Checkpoint**: `git commit -m "feat(ui): create accessible memory carousel with voice narration (Phase 3B)" && git push origin main`
-- **Phase 3C: Caregiver Add/Edit Memory Screen**
-  - **Files**: `src/screens/EditMemoryScreen.tsx`
-  - **Scope**: Install `expo-image-picker` (using modern system Photo Picker that requires 0 dangerous permissions). Allow caregiver to pick photo, enter person's name, relationship, and short memory story.
+- **[COMPLETED] Phase 3C: Caregiver Add/Edit Memory Screen**
+  - **Status**: Completed (Commit `a82e3ed`, pushed to `origin/main`)
+  - **Files**: `src/screens/EditMemoryScreen.tsx`, `src/screens/index.ts`, `src/constants/colors.ts`, `package.json`, `App.tsx`
+  - **Scope**: Install `expo-image-picker` (using modern system Photo Picker that requires 0 dangerous permissions). Allow caregiver to pick photo, enter person's name, relationship, and short memory story. Includes in-editor calming voice narration test, favorite star pinning, and sandbox persistence.
   - **Git Checkpoint**: `git commit -m "feat(screens): add caregiver photo upload and memory editor (Phase 3C)" && git push origin main`
 
 ---
