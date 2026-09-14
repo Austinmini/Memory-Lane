@@ -26,13 +26,14 @@ import {
   addNotificationResponseReceivedListener,
 } from './src/services';
 import { MemoryCarousel, HeaderTimeWidget, ReminderCard, VoicePromptModal } from './src/components';
-import { EditMemoryScreen, EditReminderScreen } from './src/screens';
+import { EditMemoryScreen, EditReminderScreen, PatientHomeScreen } from './src/screens';
 
 // Configure notification presentation handler
 setupNotificationHandler();
 
 export default function App() {
   const [loading, setLoading] = useState(true);
+  const [appMode, setAppMode] = useState<'patient' | 'caregiver'>('patient');
   const [statusLog, setStatusLog] = useState<string[]>([]);
   const [memories, setMemories] = useState<MemoryRecord[]>([]);
   const [reminders, setReminders] = useState<ReminderRecord[]>([]);
@@ -229,59 +230,93 @@ export default function App() {
     setReminders(updated);
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar style="dark" />
+        <View style={styles.loadingBox}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={[Typography.body, { color: Colors.textSecondary, marginTop: Spacing.md }]}>
+            Loading Memory Lane...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Title Header */}
-        <View style={styles.header}>
-          <Text style={[Typography.h1, { color: Colors.primary }]}>Memory Lane</Text>
-          <Text style={[Typography.bodyMediumBold, { color: Colors.textSecondary, marginTop: Spacing.xs }]}>
-            Phase 4D Verification Dashboard
-          </Text>
-          <Text style={[Typography.caption, { color: Colors.textMuted }]}>
-            Caregiver Routine Editor, Templates, Alarms & Memory Companion Active
-          </Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.md }}>
-            <TouchableOpacity
-              style={[styles.actionButton, { backgroundColor: Colors.primary }]}
-              onPress={() => speakCalmly('Hello. Welcome back to Memory Lane. Today is a peaceful day.')}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.actionButtonText}>🔊 Voice Test</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.actionButton, { backgroundColor: Colors.accentWarm }]}
-              onPress={handleTriggerTestNotification}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.actionButtonText}>🔔 Test 5s Alarm</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.actionButton, { backgroundColor: Colors.primary }]}
-              onPress={handleOpenTestVoiceModal}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.actionButtonText}>📢 Alert Modal Test</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.actionButton, { backgroundColor: Colors.textMuted }]}
-              onPress={() => stopSpeaking()}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.actionButtonText}>⏹ Stop</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
 
-        {loading ? (
-          <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" color={Colors.primary} />
-            <Text style={[Typography.body, { color: Colors.textSecondary, marginTop: Spacing.md }]}>
-              Running Local SQLite Migrations...
-            </Text>
+      {appMode === 'patient' ? (
+        <PatientHomeScreen
+          memories={memories}
+          reminders={reminders}
+          onToggleReminder={handleToggleReminder}
+          onOpenCaregiverMode={() => setAppMode('caregiver')}
+          onRefresh={runDiagnostics}
+          activePromptReminder={activePromptReminder}
+          isPromptModalVisible={isPromptModalVisible}
+          onAcknowledgeVoiceModal={handleAcknowledgeVoiceModal}
+          onDismissVoiceModal={() => setIsPromptModalVisible(false)}
+          onSelectMemoryForView={handleOpenEditMemory}
+        />
+      ) : (
+        <ScrollView contentContainerStyle={styles.container}>
+          {/* Caregiver Navigation Header */}
+          <View style={styles.caregiverNavBanner}>
+            <TouchableOpacity
+              style={styles.backToPatientButton}
+              onPress={() => setAppMode('patient')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.backToPatientButtonText}>← Return to Patient View</Text>
+            </TouchableOpacity>
+            <View style={styles.caregiverBadgePill}>
+              <Text style={styles.caregiverBadgeText}>🔒 Caregiver Mode</Text>
+            </View>
           </View>
-        ) : (
+
+          {/* Caregiver Title Header */}
+          <View style={styles.header}>
+            <Text style={[Typography.h1, { color: Colors.primary }]}>Caregiver Control Panel</Text>
+            <Text style={[Typography.bodyMediumBold, { color: Colors.textSecondary, marginTop: Spacing.xs }]}>
+              Manage Memories, Routines & Device Settings
+            </Text>
+            <Text style={[Typography.caption, { color: Colors.textMuted }]}>
+              All photos and audio reminders are stored 100% privately on this device.
+            </Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.md }}>
+              <TouchableOpacity
+                style={[styles.actionButton, { backgroundColor: Colors.primary }]}
+                onPress={() => speakCalmly('Hello. Welcome back to Memory Lane. Today is a peaceful day.')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.actionButtonText}>🔊 Voice Test</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionButton, { backgroundColor: Colors.accentWarm }]}
+                onPress={handleTriggerTestNotification}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.actionButtonText}>🔔 Test 5s Alarm</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionButton, { backgroundColor: Colors.primary }]}
+                onPress={handleOpenTestVoiceModal}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.actionButtonText}>📢 Alert Modal Test</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionButton, { backgroundColor: Colors.textMuted }]}
+                onPress={() => stopSpeaking()}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.actionButtonText}>⏹ Stop</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
           <>
             {/* Status Log Box */}
             <View style={styles.sectionCard}>
@@ -396,8 +431,8 @@ export default function App() {
               ))}
             </View>
           </>
-        )}
-      </ScrollView>
+        </ScrollView>
+      )}
 
       {/* Caregiver Memory Add/Edit Modal (Phase 3C) */}
       <Modal
@@ -524,6 +559,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingVertical: 4,
     borderRadius: Radius.full,
+  },
+  caregiverNavBanner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+    paddingTop: Spacing.xs,
+  },
+  backToPatientButton: {
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.full,
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+  },
+  backToPatientButtonText: {
+    ...Typography.button,
+    color: Colors.primary,
+    fontSize: 16,
+  },
+  caregiverBadgePill: {
+    backgroundColor: Colors.accentWarmLight,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: Radius.full,
+    borderWidth: 1,
+    borderColor: Colors.accentWarm,
+  },
+  caregiverBadgeText: {
+    ...Typography.caption,
+    fontWeight: '700',
+    color: Colors.accentWarm,
   },
 });
 

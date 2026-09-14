@@ -265,8 +265,9 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
 ---
 
 ### Phase 5: App Integration & Dual-Mode UI
-- **Phase 5A: Patient Home Screen & Caregiver Lock**
-  - **Files**: `src/screens/PatientHomeScreen.tsx`, `src/components/CaregiverLockModal.tsx`
+- **[COMPLETED] Phase 5A: Patient Home Screen & Caregiver Lock**
+  - **Status**: Completed (Commit checkpoint Phase 5A)
+  - **Files**: `src/screens/PatientHomeScreen.tsx`, `src/components/CaregiverLockModal.tsx`, `src/components/index.ts`, `src/screens/index.ts`, `App.tsx`
   - **Scope**: Assemble serene patient view containing the orientation header, memory carousel, and today's schedule. Add discreet long-press lock or PIN to enter Caregiver Mode.
   - **Git Checkpoint**: `git commit -m "feat(screens): assemble serene patient home screen with caregiver lock (Phase 5A)" && git push origin main`
 - **Phase 5B: Caregiver Dashboard & Main App Root**
