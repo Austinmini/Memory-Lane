@@ -25,7 +25,7 @@ import {
   addNotificationReceivedListener,
   addNotificationResponseReceivedListener,
 } from './src/services';
-import { MemoryCarousel } from './src/components';
+import { MemoryCarousel, HeaderTimeWidget, ReminderCard } from './src/components';
 import { EditMemoryScreen } from './src/screens';
 
 // Configure notification presentation handler
@@ -159,10 +159,10 @@ export default function App() {
         <View style={styles.header}>
           <Text style={[Typography.h1, { color: Colors.primary }]}>Memory Lane</Text>
           <Text style={[Typography.bodyMediumBold, { color: Colors.textSecondary, marginTop: Spacing.xs }]}>
-            Phase 4A Verification Dashboard
+            Phase 4B Verification Dashboard
           </Text>
           <Text style={[Typography.caption, { color: Colors.textMuted }]}>
-            Safe Local Notification Scheduling & Soothing English TTS Active
+            Orientation Time Header, Accessible Reminder Cards & Voice Readout Active
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.md }}>
             <TouchableOpacity
@@ -209,6 +209,9 @@ export default function App() {
                 </Text>
               ))}
             </View>
+
+            {/* Time Orientation Header Widget (Phase 4B) */}
+            <HeaderTimeWidget />
 
             {/* Memory Carousel Component (Phase 3B & 3C) */}
             <View style={styles.sectionCard}>
@@ -279,88 +282,22 @@ export default function App() {
               ))}
             </View>
 
-            {/* Reminders Section */}
+            {/* Reminders Section (Phase 4B) */}
             <View style={styles.sectionCard}>
               <Text style={[Typography.h2, { color: Colors.primary, marginBottom: Spacing.sm }]}>
                 Daily Routine Reminders ({reminders.length})
               </Text>
               <Text style={[Typography.caption, { color: Colors.textMuted, marginBottom: Spacing.md }]}>
-                Tap any reminder to toggle SQLite completed state
+                Accessible high-contrast cards with 56dp "Done" toggle and "Listen" audio readouts.
               </Text>
 
-              {reminders.map((r) => {
-                const isDone = !!r.isCompletedToday;
-                return (
-                  <TouchableOpacity
-                    key={r.id}
-                    style={[
-                      styles.reminderItem,
-                      isDone && { backgroundColor: Colors.successLight, borderColor: Colors.success },
-                    ]}
-                    onPress={() => handleToggleReminder(r)}
-                    activeOpacity={0.7}
-                  >
-                    <View style={styles.rowBetween}>
-                      <Text style={[Typography.h3, { color: Colors.primary }]}>
-                        ⏰ {r.timeOfDay}
-                      </Text>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
-                        <TouchableOpacity
-                          style={[styles.miniButton, { backgroundColor: Colors.surfaceElevated, borderColor: Colors.border }]}
-                          onPress={() => speakCalmly(r.spokenMessage)}
-                          activeOpacity={0.7}
-                        >
-                          <Text style={[Typography.caption, { color: Colors.primary, fontWeight: '700' }]}>
-                            🔊 Listen
-                          </Text>
-                        </TouchableOpacity>
-                        <View
-                          style={[
-                            styles.statusPill,
-                            { backgroundColor: isDone ? Colors.success : Colors.borderLight },
-                          ]}
-                        >
-                          <Text
-                            style={[
-                              Typography.badge,
-                              { color: isDone ? Colors.textInverse : Colors.textSecondary },
-                            ]}
-                          >
-                            {isDone ? '✓ Completed' : 'Pending'}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-
-                    <Text
-                      style={[
-                        Typography.bodyLarge,
-                        {
-                          color: isDone ? Colors.textSecondary : Colors.textPrimary,
-                          fontWeight: '700',
-                          marginTop: Spacing.xs,
-                          textDecorationLine: isDone ? 'line-through' : 'none',
-                        },
-                      ]}
-                    >
-                      {r.title}
-                    </Text>
-
-                    <Text
-                      style={[
-                        Typography.body,
-                        {
-                          color: Colors.textSecondary,
-                          marginTop: Spacing.xs,
-                          fontStyle: 'italic',
-                        },
-                      ]}
-                    >
-                      "{r.spokenMessage}"
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
+              {reminders.map((r) => (
+                <ReminderCard
+                  key={r.id}
+                  reminder={r}
+                  onToggleComplete={handleToggleReminder}
+                />
+              ))}
             </View>
           </>
         )}
