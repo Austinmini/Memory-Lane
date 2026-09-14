@@ -12,9 +12,24 @@ import {
 } from 'react-native';
 import { Colors, Typography, Spacing, Radius } from './src/constants';
 import { MemoryRepository, ReminderRepository, MemoryRecord, ReminderRecord } from './src/db';
-import { ensureMemoriesDirectoryExists, speakCalmly, speakMemory, stopSpeaking } from './src/services';
+import {
+  ensureMemoriesDirectoryExists,
+  speakCalmly,
+  speakMemory,
+  stopSpeaking,
+  setupNotificationHandler,
+  setupNotificationChannel,
+  requestNotificationPermissions,
+  syncAllReminderNotifications,
+  scheduleTestNotification,
+  addNotificationReceivedListener,
+  addNotificationResponseReceivedListener,
+} from './src/services';
 import { MemoryCarousel } from './src/components';
 import { EditMemoryScreen } from './src/screens';
+
+// Configure notification presentation handler
+setupNotificationHandler();
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -54,7 +69,18 @@ export default function App() {
       setReminders(loadedReminders);
       logs.push(`✅ Loaded ${loadedReminders.length} routine reminders.`);
 
-      logs.push('🎉 Phase 3C Caregiver Memory Editor Ready!');
+      logs.push('⏳ Configuring Safe Local Notifications...');
+      try {
+        await setupNotificationChannel();
+        const granted = await requestNotificationPermissions();
+        logs.push(granted ? '✅ Notification Permissions: Granted (POST_NOTIFICATIONS)' : 'ℹ️ Notification Permissions: Pending / Web');
+        const count = await syncAllReminderNotifications();
+        logs.push(`✅ Scheduled ${count} daily routine alarms safely (0 dangerous exact alarms).`);
+      } catch (notifErr: any) {
+        logs.push(`⚠️ Notification note: ${notifErr?.message || String(notifErr)}`);
+      }
+
+      logs.push('🎉 Phase 4A Safe Local Notification Service Ready!');
     } catch (err: any) {
       logs.push(`❌ Error: ${err?.message || String(err)}`);
     } finally {
@@ -65,6 +91,28 @@ export default function App() {
 
   useEffect(() => {
     runDiagnostics();
+
+    // Auto-speak incoming notifications when triggered in app
+    const subReceived = addNotificationReceivedListener((notification) => {
+      const data = notification.request.content.data;
+      const spoken = (data?.spokenMessage as string) || notification.request.content.body || '';
+      if (spoken) {
+        speakCalmly(spoken);
+      }
+    });
+
+    const subResponse = addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data;
+      const spoken = (data?.spokenMessage as string) || response.notification.request.content.body || '';
+      if (spoken) {
+        speakCalmly(spoken);
+      }
+    });
+
+    return () => {
+      subReceived.remove();
+      subResponse.remove();
+    };
   }, []);
 
   const handleToggleReminder = async (item: ReminderRecord) => {
@@ -95,6 +143,14 @@ export default function App() {
     setMemories(updated);
   };
 
+  const handleTriggerTestNotification = async () => {
+    await scheduleTestNotification(
+      5,
+      '💊 Reminder: Afternoon Hydration',
+      'Time for a nice glass of cool water or warm herbal tea to keep you feeling refreshed.'
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
@@ -103,18 +159,25 @@ export default function App() {
         <View style={styles.header}>
           <Text style={[Typography.h1, { color: Colors.primary }]}>Memory Lane</Text>
           <Text style={[Typography.bodyMediumBold, { color: Colors.textSecondary, marginTop: Spacing.xs }]}>
-            Phase 3C Verification Dashboard
+            Phase 4A Verification Dashboard
           </Text>
           <Text style={[Typography.caption, { color: Colors.textMuted }]}>
-            Caregiver Photo Picker, Voice Narration & Sandbox Persistence Active
+            Safe Local Notification Scheduling & Soothing English TTS Active
           </Text>
-          <View style={{ flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.md }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.md }}>
             <TouchableOpacity
               style={[styles.actionButton, { backgroundColor: Colors.primary }]}
               onPress={() => speakCalmly('Hello. Welcome back to Memory Lane. Today is a peaceful day.')}
               activeOpacity={0.8}
             >
-              <Text style={styles.actionButtonText}>🔊 Test Calming Voice</Text>
+              <Text style={styles.actionButtonText}>🔊 Voice Test</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: Colors.accentWarm }]}
+              onPress={handleTriggerTestNotification}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.actionButtonText}>🔔 Test 5s Alarm</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.actionButton, { backgroundColor: Colors.textMuted }]}
