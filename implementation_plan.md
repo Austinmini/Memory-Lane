@@ -244,9 +244,10 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
   - **Files**: `src/components/HeaderTimeWidget.tsx`, `src/components/ReminderCard.tsx`, `src/components/index.ts`, `App.tsx`
   - **Scope**: Build clear orientation widget (e.g. *"Today is Thursday Morning, September 11"*) and large reminder cards with "Done" checkbox and "Listen" audio button. Includes live temporal clock, period-of-day badges, voice readouts, and WCAG AAA contrast.
   - **Git Checkpoint**: `git commit -m "feat(ui): add time orientation widget and reminder cards (Phase 4B)" && git push origin main`
-- **Phase 4C: In-App Voice Reminder Alert Modal**
-  - **Files**: `src/components/VoicePromptModal.tsx`
-  - **Scope**: High-contrast, gentle pop-up modal when a reminder triggers, automatically announcing the reminder out loud in English with large "Acknowledge" button.
+- **[COMPLETED] Phase 4C: In-App Voice Reminder Alert Modal**
+  - **Status**: Completed (Commit `280a576`, pushed to `origin/main`)
+  - **Files**: `src/components/VoicePromptModal.tsx`, `src/components/index.ts`, `App.tsx`
+  - **Scope**: High-contrast, gentle pop-up modal when a reminder triggers, automatically announcing the reminder out loud in English with large "Acknowledge" button. Includes category icons, auto-speech trigger, replay audio option, and 68dp confirmation target.
   - **Git Checkpoint**: `git commit -m "feat(ui): add voice prompt alert modal for active reminders (Phase 4C)" && git push origin main`
 - **Phase 4D: Caregiver Add/Edit Reminder Screen**
   - **Files**: `src/screens/EditReminderScreen.tsx`
