@@ -266,13 +266,14 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
 
 ### Phase 5: App Integration & Dual-Mode UI
 - **[COMPLETED] Phase 5A: Patient Home Screen & Caregiver Lock**
-  - **Status**: Completed (Commit checkpoint Phase 5A)
+  - **Status**: Completed (Commit `e09b83b`, pushed to `origin/main`)
   - **Files**: `src/screens/PatientHomeScreen.tsx`, `src/components/CaregiverLockModal.tsx`, `src/components/index.ts`, `src/screens/index.ts`, `App.tsx`
   - **Scope**: Assemble serene patient view containing the orientation header, memory carousel, and today's schedule. Add discreet long-press lock or PIN to enter Caregiver Mode.
   - **Git Checkpoint**: `git commit -m "feat(screens): assemble serene patient home screen with caregiver lock (Phase 5A)" && git push origin main`
-- **Phase 5B: Caregiver Dashboard & Main App Root**
-  - **Files**: `src/screens/CaregiverDashboardScreen.tsx`, `App.tsx`
-  - **Scope**: Caregiver control panel to manage all memories, view/edit reminders, and toggle settings. Hook up navigation in `App.tsx`.
+- **[COMPLETED] Phase 5B: Caregiver Dashboard & Main App Root**
+  - **Status**: Completed (Commit checkpoint Phase 5B)
+  - **Files**: `src/screens/CaregiverDashboardScreen.tsx`, `src/screens/index.ts`, `App.tsx`
+  - **Scope**: Caregiver control panel with dedicated tabs for Family Memories, Daily Routines, Settings/Diagnostics, audio controls, and Google Play compliance disclaimers. Complete dual-mode navigation in `App.tsx`.
   - **Git Checkpoint**: `git commit -m "feat: complete caregiver dashboard and app navigation (Phase 5B)" && git push origin main`
 
 ---
