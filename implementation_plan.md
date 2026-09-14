@@ -234,9 +234,10 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
 ---
 
 ### Phase 4: Voice-Guided Daily Reminders
-- **Phase 4A: Safe Local Notification Scheduling**
-  - **Files**: `src/services/notificationService.ts`
-  - **Scope**: Install `expo-notifications`. Configure permissible scheduled notifications (avoiding restricted `USE_EXACT_ALARM`) for daily routine items (Meds, Meals, Hydration, Calls).
+- **[COMPLETED] Phase 4A: Safe Local Notification Scheduling**
+  - **Status**: Completed (Commit `1029b5f`, pushed to `origin/main`)
+  - **Files**: `src/services/notificationService.ts`, `src/services/index.ts`, `package.json`, `app.json`, `App.tsx`
+  - **Scope**: Install `expo-notifications`. Configure permissible scheduled notifications (avoiding restricted `USE_EXACT_ALARM`) for daily routine items (Meds, Meals, Hydration, Calls). Includes Android notification channel setup, daily recurrence triggers, foreground speech integration, and instant test verification.
   - **Git Checkpoint**: `git commit -m "feat(notifications): add safe local notification scheduling service (Phase 4A)" && git push origin main`
 - **Phase 4B: Orientation Header & Daily Reminder Cards**
   - **Files**: `src/components/HeaderTimeWidget.tsx`, `src/components/ReminderCard.tsx`
