@@ -26,7 +26,7 @@ import {
   addNotificationResponseReceivedListener,
 } from './src/services';
 import { MemoryCarousel, HeaderTimeWidget, ReminderCard, VoicePromptModal } from './src/components';
-import { EditMemoryScreen } from './src/screens';
+import { EditMemoryScreen, EditReminderScreen } from './src/screens';
 
 // Configure notification presentation handler
 setupNotificationHandler();
@@ -41,6 +41,8 @@ export default function App() {
   const [selectedMemoryForEdit, setSelectedMemoryForEdit] = useState<MemoryRecord | null>(null);
   const [activePromptReminder, setActivePromptReminder] = useState<ReminderRecord | null>(null);
   const [isPromptModalVisible, setIsPromptModalVisible] = useState(false);
+  const [isReminderEditorOpen, setIsReminderEditorOpen] = useState(false);
+  const [selectedReminderForEdit, setSelectedReminderForEdit] = useState<ReminderRecord | null>(null);
 
   const runDiagnostics = async () => {
     setLoading(true);
@@ -210,6 +212,23 @@ export default function App() {
     setIsPromptModalVisible(true);
   };
 
+  const handleOpenAddReminder = () => {
+    setSelectedReminderForEdit(null);
+    setIsReminderEditorOpen(true);
+  };
+
+  const handleOpenEditReminder = (item: ReminderRecord) => {
+    setSelectedReminderForEdit(item);
+    setIsReminderEditorOpen(true);
+  };
+
+  const handleSaveOrDeleteReminder = async () => {
+    setIsReminderEditorOpen(false);
+    setSelectedReminderForEdit(null);
+    const updated = await ReminderRepository.getAll();
+    setReminders(updated);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
@@ -218,10 +237,10 @@ export default function App() {
         <View style={styles.header}>
           <Text style={[Typography.h1, { color: Colors.primary }]}>Memory Lane</Text>
           <Text style={[Typography.bodyMediumBold, { color: Colors.textSecondary, marginTop: Spacing.xs }]}>
-            Phase 4C Verification Dashboard
+            Phase 4D Verification Dashboard
           </Text>
           <Text style={[Typography.caption, { color: Colors.textMuted }]}>
-            Gentle Voice Prompt Alert Modal, Temporal Clock & Accessible Cards Active
+            Caregiver Routine Editor, Templates, Alarms & Memory Companion Active
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.md }}>
             <TouchableOpacity
@@ -348,13 +367,22 @@ export default function App() {
               ))}
             </View>
 
-            {/* Reminders Section (Phase 4B) */}
+            {/* Reminders Section (Phase 4B & 4D) */}
             <View style={styles.sectionCard}>
-              <Text style={[Typography.h2, { color: Colors.primary, marginBottom: Spacing.sm }]}>
-                Daily Routine Reminders ({reminders.length})
-              </Text>
-              <Text style={[Typography.caption, { color: Colors.textMuted, marginBottom: Spacing.md }]}>
-                Accessible high-contrast cards with 56dp "Done" toggle and "Listen" audio readouts.
+              <View style={styles.rowBetween}>
+                <Text style={[Typography.h2, { color: Colors.primary }]}>
+                  Daily Routine Reminders ({reminders.length})
+                </Text>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={handleOpenAddReminder}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.actionButtonText}>+ Add Routine</Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={[Typography.caption, { color: Colors.textMuted, marginTop: Spacing.xs, marginBottom: Spacing.md }]}>
+                Tap "+ Add Routine" or ✏️ on any card to edit templates, spoken voice instructions & alarm times.
               </Text>
 
               {reminders.map((r) => (
@@ -362,6 +390,8 @@ export default function App() {
                   key={r.id}
                   reminder={r}
                   onToggleComplete={handleToggleReminder}
+                  onPressEdit={handleOpenEditReminder}
+                  showEditButton={true}
                 />
               ))}
             </View>
@@ -381,6 +411,22 @@ export default function App() {
             onSave={handleSaveOrDeleteMemory}
             onCancel={() => setIsEditorOpen(false)}
             onDelete={handleSaveOrDeleteMemory}
+          />
+        </SafeAreaView>
+      </Modal>
+
+      {/* Caregiver Reminder Add/Edit Modal (Phase 4D) */}
+      <Modal
+        visible={isReminderEditorOpen}
+        animationType="slide"
+        onRequestClose={() => setIsReminderEditorOpen(false)}
+      >
+        <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+          <EditReminderScreen
+            reminder={selectedReminderForEdit}
+            onSave={handleSaveOrDeleteReminder}
+            onCancel={() => setIsReminderEditorOpen(false)}
+            onDelete={handleSaveOrDeleteReminder}
           />
         </SafeAreaView>
       </Modal>
