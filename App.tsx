@@ -8,11 +8,13 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { Colors, Typography, Spacing, Radius } from './src/constants';
 import { MemoryRepository, ReminderRepository, MemoryRecord, ReminderRecord } from './src/db';
 import { ensureMemoriesDirectoryExists, speakCalmly, speakMemory, stopSpeaking } from './src/services';
 import { MemoryCarousel } from './src/components';
+import { EditMemoryScreen } from './src/screens';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -20,6 +22,8 @@ export default function App() {
   const [memories, setMemories] = useState<MemoryRecord[]>([]);
   const [reminders, setReminders] = useState<ReminderRecord[]>([]);
   const [sandboxDir, setSandboxDir] = useState<string>('');
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [selectedMemoryForEdit, setSelectedMemoryForEdit] = useState<MemoryRecord | null>(null);
 
   const runDiagnostics = async () => {
     setLoading(true);
@@ -50,7 +54,7 @@ export default function App() {
       setReminders(loadedReminders);
       logs.push(`✅ Loaded ${loadedReminders.length} routine reminders.`);
 
-      logs.push('🎉 Phase 2 Database & Storage Ready!');
+      logs.push('🎉 Phase 3C Caregiver Memory Editor Ready!');
     } catch (err: any) {
       logs.push(`❌ Error: ${err?.message || String(err)}`);
     } finally {
@@ -74,17 +78,19 @@ export default function App() {
     setReminders(updated);
   };
 
-  const handleAddSampleMemory = async () => {
-    const id = `mem_custom_${Date.now()}`;
-    await MemoryRepository.create({
-      id,
-      title: 'Family Gathering',
-      relationship: 'Family',
-      story: 'A wonderful evening filled with laughter, smiles, and your favorite apple pie.',
-      localImageUri: 'seed_custom',
-      isFavorite: 1,
-      sortOrder: 0,
-    });
+  const handleOpenAddMemory = () => {
+    setSelectedMemoryForEdit(null);
+    setIsEditorOpen(true);
+  };
+
+  const handleOpenEditMemory = (mem: MemoryRecord) => {
+    setSelectedMemoryForEdit(mem);
+    setIsEditorOpen(true);
+  };
+
+  const handleSaveOrDeleteMemory = async () => {
+    setIsEditorOpen(false);
+    setSelectedMemoryForEdit(null);
     const updated = await MemoryRepository.getAll();
     setMemories(updated);
   };
@@ -97,10 +103,10 @@ export default function App() {
         <View style={styles.header}>
           <Text style={[Typography.h1, { color: Colors.primary }]}>Memory Lane</Text>
           <Text style={[Typography.bodyMediumBold, { color: Colors.textSecondary, marginTop: Spacing.xs }]}>
-            Phase 3A Verification Dashboard
+            Phase 3C Verification Dashboard
           </Text>
           <Text style={[Typography.caption, { color: Colors.textMuted }]}>
-            Local SQLite, Sandbox Storage & Calming Speech (TTS) Active
+            Caregiver Photo Picker, Voice Narration & Sandbox Persistence Active
           </Text>
           <View style={{ flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.md }}>
             <TouchableOpacity
@@ -141,7 +147,7 @@ export default function App() {
               ))}
             </View>
 
-            {/* Memory Carousel Component (Phase 3B) */}
+            {/* Memory Carousel Component (Phase 3B & 3C) */}
             <View style={styles.sectionCard}>
               <View style={styles.rowBetween}>
                 <Text style={[Typography.h2, { color: Colors.primary }]}>
@@ -149,17 +155,20 @@ export default function App() {
                 </Text>
                 <TouchableOpacity
                   style={styles.actionButton}
-                  onPress={handleAddSampleMemory}
+                  onPress={handleOpenAddMemory}
                   activeOpacity={0.8}
                 >
                   <Text style={styles.actionButtonText}>+ Add Memory</Text>
                 </TouchableOpacity>
               </View>
               <Text style={[Typography.caption, { color: Colors.textMuted, marginTop: Spacing.xs, marginBottom: Spacing.sm }]}>
-                Dementia-friendly large cards with voice narration, auto-slideshow, and high contrast.
+                Dementia-friendly cards with voice narration. Tap card or "+ Add Memory" to open Caregiver Editor.
               </Text>
 
-              <MemoryCarousel memories={memories} />
+              <MemoryCarousel
+                memories={memories}
+                onMemoryPress={handleOpenEditMemory}
+              />
             </View>
 
             {/* Memories List */}
@@ -176,15 +185,26 @@ export default function App() {
                     <View style={styles.badge}>
                       <Text style={styles.badgeText}>{m.relationship}</Text>
                     </View>
-                    <TouchableOpacity
-                      style={[styles.miniButton, { backgroundColor: Colors.surfaceElevated, borderColor: Colors.border }]}
-                      onPress={() => speakMemory(m.title, m.relationship, m.story)}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[Typography.caption, { color: Colors.primary, fontWeight: '700' }]}>
-                        🔊 Read Aloud
-                      </Text>
-                    </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', gap: Spacing.xs }}>
+                      <TouchableOpacity
+                        style={[styles.miniButton, { backgroundColor: Colors.surfaceElevated, borderColor: Colors.border }]}
+                        onPress={() => handleOpenEditMemory(m)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[Typography.caption, { color: Colors.primary, fontWeight: '700' }]}>
+                          ✏️ Edit
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.miniButton, { backgroundColor: Colors.surfaceElevated, borderColor: Colors.border }]}
+                        onPress={() => speakMemory(m.title, m.relationship, m.story)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[Typography.caption, { color: Colors.primary, fontWeight: '700' }]}>
+                          🔊 Read Aloud
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                   <Text style={[Typography.bodyLarge, { color: Colors.textPrimary, fontWeight: '700' }]}>
                     {m.title}
@@ -282,6 +302,22 @@ export default function App() {
           </>
         )}
       </ScrollView>
+
+      {/* Caregiver Memory Add/Edit Modal (Phase 3C) */}
+      <Modal
+        visible={isEditorOpen}
+        animationType="slide"
+        onRequestClose={() => setIsEditorOpen(false)}
+      >
+        <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+          <EditMemoryScreen
+            memory={selectedMemoryForEdit}
+            onSave={handleSaveOrDeleteMemory}
+            onCancel={() => setIsEditorOpen(false)}
+            onDelete={handleSaveOrDeleteMemory}
+          />
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }

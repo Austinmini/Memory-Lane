@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Dementia-friendly accessible color palette for Memory Lane.
  * Designed to meet WCAG AAA contrast ratios on text and touch elements.
  * Features calming earthy tones (Sage, Warm Cream, Deep Navy) to reduce
@@ -21,6 +21,8 @@ export const Colors = {
   // Status & Routine Indicators
   success: '#1D6B42',        // Deep forest green for completed tasks
   successLight: '#E9F5EE',
+  danger: '#A82828',         // Controlled crimson for delete/destructive actions
+  dangerLight: '#FDECEC',    // Soft tinted red for warning backgrounds
   info: '#205B7A',           // Clear informational indicator
   infoLight: '#EBF4F9',
 
