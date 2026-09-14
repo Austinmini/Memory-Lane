@@ -25,7 +25,7 @@ import {
   addNotificationReceivedListener,
   addNotificationResponseReceivedListener,
 } from './src/services';
-import { MemoryCarousel, HeaderTimeWidget, ReminderCard } from './src/components';
+import { MemoryCarousel, HeaderTimeWidget, ReminderCard, VoicePromptModal } from './src/components';
 import { EditMemoryScreen } from './src/screens';
 
 // Configure notification presentation handler
@@ -39,6 +39,8 @@ export default function App() {
   const [sandboxDir, setSandboxDir] = useState<string>('');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [selectedMemoryForEdit, setSelectedMemoryForEdit] = useState<MemoryRecord | null>(null);
+  const [activePromptReminder, setActivePromptReminder] = useState<ReminderRecord | null>(null);
+  const [isPromptModalVisible, setIsPromptModalVisible] = useState(false);
 
   const runDiagnostics = async () => {
     setLoading(true);
@@ -92,21 +94,49 @@ export default function App() {
   useEffect(() => {
     runDiagnostics();
 
-    // Auto-speak incoming notifications when triggered in app
+    // Auto-display Voice Prompt Alert Modal when notification triggers or is tapped
+    const showVoiceModalFromNotification = (data: any, fallbackBody?: string, fallbackTitle?: string) => {
+      const reminderId = data?.reminderId;
+      const title = data?.title || fallbackTitle || 'Routine Reminder';
+      const spokenMessage = (data?.spokenMessage as string) || fallbackBody || 'Time for your daily routine.';
+      const category = data?.category || 'hydration';
+      const timeOfDay = data?.timeOfDay || '12:00';
+
+      const record: ReminderRecord = {
+        id: reminderId || `rem_temp_${Date.now()}`,
+        title,
+        category,
+        timeOfDay,
+        spokenMessage,
+        repeatDaily: 1,
+        isEnabled: 1,
+        isCompletedToday: 0,
+        lastCompletedDate: null,
+        notificationId: null,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+
+      setActivePromptReminder(record);
+      setIsPromptModalVisible(true);
+    };
+
     const subReceived = addNotificationReceivedListener((notification) => {
       const data = notification.request.content.data;
-      const spoken = (data?.spokenMessage as string) || notification.request.content.body || '';
-      if (spoken) {
-        speakCalmly(spoken);
-      }
+      showVoiceModalFromNotification(
+        data,
+        notification.request.content.body || '',
+        notification.request.content.title || ''
+      );
     });
 
     const subResponse = addNotificationResponseReceivedListener((response) => {
       const data = response.notification.request.content.data;
-      const spoken = (data?.spokenMessage as string) || response.notification.request.content.body || '';
-      if (spoken) {
-        speakCalmly(spoken);
-      }
+      showVoiceModalFromNotification(
+        data,
+        response.notification.request.content.body || '',
+        response.notification.request.content.title || ''
+      );
     });
 
     return () => {
@@ -143,12 +173,41 @@ export default function App() {
     setMemories(updated);
   };
 
+  const handleAcknowledgeVoiceModal = async (reminder: ReminderRecord | null) => {
+    if (reminder && reminder.id) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      await ReminderRepository.markCompleted(reminder.id, todayStr);
+      const updated = await ReminderRepository.getAll();
+      setReminders(updated);
+    }
+    setIsPromptModalVisible(false);
+    setActivePromptReminder(null);
+  };
+
   const handleTriggerTestNotification = async () => {
     await scheduleTestNotification(
       5,
       '💊 Reminder: Afternoon Hydration',
       'Time for a nice glass of cool water or warm herbal tea to keep you feeling refreshed.'
     );
+  };
+
+  const handleOpenTestVoiceModal = () => {
+    setActivePromptReminder({
+      id: 'rem_modal_test',
+      title: 'Morning Medication',
+      category: 'medication',
+      timeOfDay: '08:30',
+      spokenMessage: 'Good morning! It is time to take your morning medication with a fresh glass of water.',
+      repeatDaily: 1,
+      isEnabled: 1,
+      isCompletedToday: 0,
+      lastCompletedDate: null,
+      notificationId: null,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+    setIsPromptModalVisible(true);
   };
 
   return (
@@ -159,10 +218,10 @@ export default function App() {
         <View style={styles.header}>
           <Text style={[Typography.h1, { color: Colors.primary }]}>Memory Lane</Text>
           <Text style={[Typography.bodyMediumBold, { color: Colors.textSecondary, marginTop: Spacing.xs }]}>
-            Phase 4B Verification Dashboard
+            Phase 4C Verification Dashboard
           </Text>
           <Text style={[Typography.caption, { color: Colors.textMuted }]}>
-            Orientation Time Header, Accessible Reminder Cards & Voice Readout Active
+            Gentle Voice Prompt Alert Modal, Temporal Clock & Accessible Cards Active
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginTop: Spacing.md }}>
             <TouchableOpacity
@@ -178,6 +237,13 @@ export default function App() {
               activeOpacity={0.8}
             >
               <Text style={styles.actionButtonText}>🔔 Test 5s Alarm</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: Colors.primary }]}
+              onPress={handleOpenTestVoiceModal}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.actionButtonText}>📢 Alert Modal Test</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.actionButton, { backgroundColor: Colors.textMuted }]}
@@ -318,6 +384,14 @@ export default function App() {
           />
         </SafeAreaView>
       </Modal>
+
+      {/* Voice Prompt Alert Modal (Phase 4C) */}
+      <VoicePromptModal
+        visible={isPromptModalVisible}
+        reminder={activePromptReminder}
+        onAcknowledge={handleAcknowledgeVoiceModal}
+        onDismiss={() => setIsPromptModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }
