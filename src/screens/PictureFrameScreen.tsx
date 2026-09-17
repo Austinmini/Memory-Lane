@@ -9,6 +9,7 @@ import {
   Dimensions,
   Platform,
   StatusBar as RNStatusBar,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -41,6 +42,9 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
   onToggleReminder,
   slideDurationSeconds = DEFAULT_SLIDE_INTERVAL_SEC,
 }) => {
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const isLandscape = windowWidth > windowHeight;
+
   // Keep the device screen awake indefinitely while Picture Frame Mode is active
   useKeepAwake();
 
@@ -398,43 +402,116 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
         )}
       </TouchableOpacity>
 
-      {/* Top Ambient Bar (Always subtle, visible on touch) */}
-      <SafeAreaView style={styles.topSafeArea} pointerEvents="box-none">
-        <View style={styles.topBar}>
-          {/* Top Left Cluster: Clock Badge & Upcoming Reminder */}
-          <View style={styles.topLeftCluster} pointerEvents="box-none">
-            {/* Clock & Date Orientation Badge */}
-            <View style={styles.ambientClockBadge}>
-              <Text style={styles.ambientClockText}>{currentTimeStr}</Text>
-              <Text style={styles.ambientDateText}>{currentDateStr}</Text>
+      {/* ========================================================= */}
+      {/* LANDSCAPE AMBIENT SIDE WINGS (Fuzzy pillarbox sections)   */}
+      {/* Left Wing: Big Clock & Date | Right Wing: Big Upcoming    */}
+      {/* ========================================================= */}
+      {isLandscape && (
+        <>
+          {/* Left Fuzzy Wing: Large Time & Date */}
+          <View
+            style={[
+              styles.landscapeLeftWing,
+              { width: Math.min(260, Math.max(170, (windowWidth - windowHeight) / 2 - 16)) },
+            ]}
+            pointerEvents="box-none"
+          >
+            <View style={styles.largeClockCard}>
+              <Text style={styles.largeClockTime}>{currentTimeStr}</Text>
+              <Text style={styles.largeClockDate}>{currentDateStr}</Text>
             </View>
+          </View>
 
-            {/* Ambient Upcoming Reminder Glance Chip */}
-            {upcomingReminder && (
+          {/* Right Fuzzy Wing: Large Upcoming Reminder */}
+          <View
+            style={[
+              styles.landscapeRightWing,
+              { width: Math.min(260, Math.max(170, (windowWidth - windowHeight) / 2 - 16)) },
+            ]}
+            pointerEvents="box-none"
+          >
+            {upcomingReminder ? (
               <TouchableOpacity
-                style={styles.upcomingReminderChip}
+                style={styles.largeUpcomingCard}
                 onPress={handleSpeakUpcomingReminder}
                 activeOpacity={0.8}
                 accessibilityRole="button"
                 accessibilityLabel={`Upcoming reminder: ${upcomingReminder.title} at ${formatDisplayTime(upcomingReminder.timeOfDay)}`}
               >
-                <Text style={styles.upcomingEmoji}>
-                  {getCategoryEmoji(upcomingReminder.category)}
-                </Text>
-                <View style={styles.upcomingTextWrap}>
-                  <View style={styles.upcomingTimeRow}>
-                    <Text style={styles.upcomingPrefix}>Upcoming ·</Text>
-                    <Text style={styles.upcomingTimeText}>
+                <View style={styles.largeUpcomingHeader}>
+                  <View style={styles.largeUpcomingEmojiBadge}>
+                    <Text style={styles.largeUpcomingEmoji}>
+                      {getCategoryEmoji(upcomingReminder.category)}
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.largeUpcomingTag}>UPCOMING ROUTINE</Text>
+                    <Text style={styles.largeUpcomingTime}>
                       {formatDisplayTime(upcomingReminder.timeOfDay)}
                     </Text>
                   </View>
-                  <Text style={styles.upcomingTitleText} numberOfLines={1}>
-                    {upcomingReminder.title}
-                  </Text>
+                </View>
+
+                <Text style={styles.largeUpcomingTitle} numberOfLines={2}>
+                  {upcomingReminder.title}
+                </Text>
+
+                <View style={styles.listenPillRow}>
+                  <Text style={styles.listenPillText}>🔊 Tap to listen</Text>
                 </View>
               </TouchableOpacity>
+            ) : (
+              <View style={styles.allDoneCard}>
+                <Text style={styles.allDoneEmoji}>✨</Text>
+                <Text style={styles.allDoneTitle}>All Done</Text>
+                <Text style={styles.allDoneSubtitle}>No pending routines for today</Text>
+              </View>
             )}
           </View>
+        </>
+      )}
+
+      {/* Top Ambient Bar (Always subtle, visible on touch) */}
+      <SafeAreaView style={styles.topSafeArea} pointerEvents="box-none">
+        <View style={styles.topBar}>
+          {/* In Portrait: Show top-left clock & reminder badge */}
+          {!isLandscape ? (
+            <View style={styles.topLeftCluster} pointerEvents="box-none">
+              {/* Clock & Date Orientation Badge */}
+              <View style={styles.ambientClockBadge}>
+                <Text style={styles.ambientClockText}>{currentTimeStr}</Text>
+                <Text style={styles.ambientDateText}>{currentDateStr}</Text>
+              </View>
+
+              {/* Ambient Upcoming Reminder Glance Chip */}
+              {upcomingReminder && (
+                <TouchableOpacity
+                  style={styles.upcomingReminderChip}
+                  onPress={handleSpeakUpcomingReminder}
+                  activeOpacity={0.8}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Upcoming reminder: ${upcomingReminder.title} at ${formatDisplayTime(upcomingReminder.timeOfDay)}`}
+                >
+                  <Text style={styles.upcomingEmoji}>
+                    {getCategoryEmoji(upcomingReminder.category)}
+                  </Text>
+                  <View style={styles.upcomingTextWrap}>
+                    <View style={styles.upcomingTimeRow}>
+                      <Text style={styles.upcomingPrefix}>Upcoming ·</Text>
+                      <Text style={styles.upcomingTimeText}>
+                        {formatDisplayTime(upcomingReminder.timeOfDay)}
+                      </Text>
+                    </View>
+                    <Text style={styles.upcomingTitleText} numberOfLines={1}>
+                      {upcomingReminder.title}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            </View>
+          ) : (
+            <View style={{ flex: 1 }} />
+          )}
 
           {/* Discreet Control Buttons */}
           {controlsVisible && (
@@ -785,6 +862,145 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     marginTop: -4,
   },
+  landscapeLeftWing: {
+    position: 'absolute',
+    left: Spacing.md,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 7,
+  },
+  largeClockCard: {
+    width: '100%',
+    backgroundColor: 'rgba(15, 23, 19, 0.88)',
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xl,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.28)',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  largeClockTime: {
+    ...Typography.h1,
+    color: Colors.textInverse,
+    fontSize: 32,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  largeClockDate: {
+    ...Typography.body,
+    color: '#D2DDD5',
+    fontSize: 16,
+    marginTop: Spacing.xs,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  landscapeRightWing: {
+    position: 'absolute',
+    right: Spacing.md,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 7,
+  },
+  largeUpcomingCard: {
+    width: '100%',
+    backgroundColor: 'rgba(15, 23, 19, 0.90)',
+    borderRadius: Radius.lg,
+    padding: Spacing.md + 2,
+    borderWidth: 2,
+    borderColor: 'rgba(244, 180, 26, 0.55)',
+    shadowColor: '#000',
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  largeUpcomingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.xs + 2,
+  },
+  largeUpcomingEmojiBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(244, 180, 26, 0.22)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(244, 180, 26, 0.45)',
+  },
+  largeUpcomingEmoji: {
+    fontSize: 20,
+  },
+  largeUpcomingTag: {
+    ...Typography.caption,
+    color: '#C3D0C6',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  largeUpcomingTime: {
+    ...Typography.bodyMediumBold,
+    color: Colors.accentWarm,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  largeUpcomingTitle: {
+    ...Typography.bodyLarge,
+    color: Colors.textInverse,
+    fontSize: 16,
+    fontWeight: '700',
+    lineHeight: 22,
+    marginTop: 2,
+  },
+  listenPillRow: {
+    marginTop: Spacing.sm,
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(244, 180, 26, 0.18)',
+    paddingHorizontal: Spacing.sm + 2,
+    paddingVertical: 3,
+    borderRadius: Radius.full,
+  },
+  listenPillText: {
+    ...Typography.caption,
+    color: Colors.accentWarm,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  allDoneCard: {
+    width: '100%',
+    backgroundColor: 'rgba(15, 23, 19, 0.80)',
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+  },
+  allDoneEmoji: {
+    fontSize: 28,
+    marginBottom: Spacing.xs,
+  },
+  allDoneTitle: {
+    ...Typography.bodyMediumBold,
+    color: Colors.textInverse,
+    fontSize: 15,
+  },
+  allDoneSubtitle: {
+    ...Typography.caption,
+    color: '#D2DDD5',
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 2,
+  },
   bottomCaptionContainer: {
     position: 'absolute',
     bottom: 0,
@@ -792,27 +1008,29 @@ const styles = StyleSheet.create({
     right: 0,
     padding: Spacing.lg,
     paddingBottom: Spacing.xl * 1.2,
+    alignItems: 'center',
     zIndex: 8,
   },
   titleCard: {
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(15, 23, 19, 0.82)',
+    alignSelf: 'center',
+    backgroundColor: 'rgba(15, 23, 19, 0.85)',
     borderRadius: Radius.full,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    borderWidth: 1,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.sm + 2,
+    borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.25)',
     shadowColor: '#000',
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.35,
     shadowRadius: 10,
     elevation: 6,
-    maxWidth: '92%',
+    maxWidth: '85%',
   },
   captionTitle: {
     color: Colors.textInverse,
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
     letterSpacing: 0.3,
+    textAlign: 'center',
   },
   reminderOverlayBackdrop: {
     position: 'absolute',
