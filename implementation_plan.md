@@ -276,7 +276,7 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
   - **Scope**: Caregiver control panel with dedicated tabs for Family Memories, Daily Routines, Settings/Diagnostics, audio controls, and Google Play compliance disclaimers. Complete dual-mode navigation in `App.tsx`.
   - **Git Checkpoint**: `git commit -m "feat: complete caregiver dashboard and app navigation (Phase 5B)" && git push origin main`
 - **[COMPLETED] Phase 5C: Ambient Digital Picture Frame & Voice-Guided Reminder Mode**
-  - **Status**: Completed (Commit checkpoint Phase 5C)
+  - **Status**: Completed (Commit `50e13de`, pushed to `origin/main`)
   - **Files**: `src/screens/PictureFrameScreen.tsx`, `src/screens/index.ts`, `src/screens/PatientHomeScreen.tsx`, `src/screens/CaregiverDashboardScreen.tsx`, `package.json`, `App.tsx`
   - **Scope**:
     1. Install `expo-keep-awake` to prevent screen sleep while in Picture Frame Mode.
