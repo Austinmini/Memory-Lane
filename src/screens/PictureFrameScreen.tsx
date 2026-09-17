@@ -45,6 +45,11 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const isLandscape = windowWidth > windowHeight;
 
+  // Skinny wing width: stays strictly within the blurred pillarbox margin without bleeding into the photo
+  const wingWidth = isLandscape
+    ? Math.min(132, Math.max(92, Math.floor((windowWidth - windowHeight) / 2 - 20)))
+    : 120;
+
   // Keep the device screen awake indefinitely while Picture Frame Mode is active
   useKeepAwake();
 
@@ -408,25 +413,26 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
       {/* ========================================================= */}
       {isLandscape && (
         <>
-          {/* Left Fuzzy Wing: Large Time & Date */}
+          {/* Left Fuzzy Wing: Skinny Time & Date */}
           <View
             style={[
               styles.landscapeLeftWing,
-              { width: Math.min(260, Math.max(170, (windowWidth - windowHeight) / 2 - 16)) },
+              { width: wingWidth },
             ]}
             pointerEvents="box-none"
           >
             <View style={styles.largeClockCard}>
-              <Text style={styles.largeClockTime}>{currentTimeStr}</Text>
-              <Text style={styles.largeClockDate}>{currentDateStr}</Text>
+              <Text style={styles.skinnyClockTime}>{currentTimeStr}</Text>
+              <View style={styles.skinnyDivider} />
+              <Text style={styles.skinnyClockDate}>{currentDateStr}</Text>
             </View>
           </View>
 
-          {/* Right Fuzzy Wing: Large Upcoming Reminder */}
+          {/* Right Fuzzy Wing: Skinny Upcoming Reminder */}
           <View
             style={[
               styles.landscapeRightWing,
-              { width: Math.min(260, Math.max(170, (windowWidth - windowHeight) / 2 - 16)) },
+              { width: wingWidth },
             ]}
             pointerEvents="box-none"
           >
@@ -438,33 +444,30 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
                 accessibilityRole="button"
                 accessibilityLabel={`Upcoming reminder: ${upcomingReminder.title} at ${formatDisplayTime(upcomingReminder.timeOfDay)}`}
               >
-                <View style={styles.largeUpcomingHeader}>
-                  <View style={styles.largeUpcomingEmojiBadge}>
-                    <Text style={styles.largeUpcomingEmoji}>
-                      {getCategoryEmoji(upcomingReminder.category)}
-                    </Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.largeUpcomingTag}>UPCOMING ROUTINE</Text>
-                    <Text style={styles.largeUpcomingTime}>
-                      {formatDisplayTime(upcomingReminder.timeOfDay)}
-                    </Text>
-                  </View>
+                <View style={styles.skinnyUpcomingEmojiCircle}>
+                  <Text style={styles.skinnyUpcomingEmoji}>
+                    {getCategoryEmoji(upcomingReminder.category)}
+                  </Text>
                 </View>
 
-                <Text style={styles.largeUpcomingTitle} numberOfLines={2}>
+                <Text style={styles.skinnyUpcomingTag}>UPCOMING</Text>
+                <Text style={styles.skinnyUpcomingTime}>
+                  {formatDisplayTime(upcomingReminder.timeOfDay)}
+                </Text>
+
+                <Text style={styles.skinnyUpcomingTitle} numberOfLines={2}>
                   {upcomingReminder.title}
                 </Text>
 
-                <View style={styles.listenPillRow}>
-                  <Text style={styles.listenPillText}>🔊 Tap to listen</Text>
+                <View style={styles.skinnyListenBadge}>
+                  <Text style={styles.skinnyListenText}>🔊 Listen</Text>
                 </View>
               </TouchableOpacity>
             ) : (
               <View style={styles.allDoneCard}>
                 <Text style={styles.allDoneEmoji}>✨</Text>
                 <Text style={styles.allDoneTitle}>All Done</Text>
-                <Text style={styles.allDoneSubtitle}>No pending routines for today</Text>
+                <Text style={styles.allDoneSubtitle}>No routines left</Text>
               </View>
             )}
           </View>
@@ -864,7 +867,7 @@ const styles = StyleSheet.create({
   },
   landscapeLeftWing: {
     position: 'absolute',
-    left: Spacing.md,
+    left: 8,
     top: 0,
     bottom: 0,
     justifyContent: 'center',
@@ -875,35 +878,40 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'rgba(15, 23, 19, 0.88)',
     borderRadius: Radius.lg,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.xs + 2,
+    paddingVertical: Spacing.md,
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.28)',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 6,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  largeClockTime: {
-    ...Typography.h1,
+  skinnyClockTime: {
     color: Colors.textInverse,
-    fontSize: 32,
+    fontSize: 21,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
     textAlign: 'center',
   },
-  largeClockDate: {
-    ...Typography.body,
+  skinnyDivider: {
+    width: '60%',
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginVertical: Spacing.xs + 2,
+  },
+  skinnyClockDate: {
+    ...Typography.caption,
     color: '#D2DDD5',
-    fontSize: 16,
-    marginTop: Spacing.xs,
+    fontSize: 13,
     textAlign: 'center',
     fontWeight: '500',
+    lineHeight: 18,
   },
   landscapeRightWing: {
     position: 'absolute',
-    right: Spacing.md,
+    right: 8,
     top: 0,
     bottom: 0,
     justifyContent: 'center',
@@ -914,92 +922,92 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'rgba(15, 23, 19, 0.90)',
     borderRadius: Radius.lg,
-    padding: Spacing.md + 2,
-    borderWidth: 2,
+    paddingHorizontal: Spacing.xs + 2,
+    paddingVertical: Spacing.sm + 2,
+    borderWidth: 1.5,
     borderColor: 'rgba(244, 180, 26, 0.55)',
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 6,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  largeUpcomingHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    marginBottom: Spacing.xs + 2,
-  },
-  largeUpcomingEmojiBadge: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  skinnyUpcomingEmojiCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: 'rgba(244, 180, 26, 0.22)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(244, 180, 26, 0.45)',
+    marginBottom: 4,
   },
-  largeUpcomingEmoji: {
-    fontSize: 20,
+  skinnyUpcomingEmoji: {
+    fontSize: 18,
   },
-  largeUpcomingTag: {
+  skinnyUpcomingTag: {
     ...Typography.caption,
     color: '#C3D0C6',
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-  largeUpcomingTime: {
-    ...Typography.bodyMediumBold,
-    color: Colors.accentWarm,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  largeUpcomingTitle: {
-    ...Typography.bodyLarge,
-    color: Colors.textInverse,
-    fontSize: 16,
-    fontWeight: '700',
-    lineHeight: 22,
-    marginTop: 2,
-  },
-  listenPillRow: {
-    marginTop: Spacing.sm,
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(244, 180, 26, 0.18)',
-    paddingHorizontal: Spacing.sm + 2,
-    paddingVertical: 3,
-    borderRadius: Radius.full,
-  },
-  listenPillText: {
+  skinnyUpcomingTime: {
     ...Typography.caption,
     color: Colors.accentWarm,
-    fontSize: 11,
+    fontSize: 13,
+    fontWeight: '700',
+    marginTop: 1,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  skinnyUpcomingTitle: {
+    ...Typography.caption,
+    color: Colors.textInverse,
+    fontSize: 12,
+    fontWeight: '600',
+    lineHeight: 16,
+    textAlign: 'center',
+  },
+  skinnyListenBadge: {
+    marginTop: Spacing.xs + 2,
+    backgroundColor: 'rgba(244, 180, 26, 0.2)',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: Radius.full,
+  },
+  skinnyListenText: {
+    ...Typography.caption,
+    color: Colors.accentWarm,
+    fontSize: 10,
     fontWeight: '700',
   },
   allDoneCard: {
     width: '100%',
     backgroundColor: 'rgba(15, 23, 19, 0.80)',
     borderRadius: Radius.lg,
-    padding: Spacing.md,
+    padding: Spacing.sm,
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
   },
   allDoneEmoji: {
-    fontSize: 28,
-    marginBottom: Spacing.xs,
+    fontSize: 22,
+    marginBottom: 2,
   },
   allDoneTitle: {
-    ...Typography.bodyMediumBold,
+    ...Typography.caption,
     color: Colors.textInverse,
-    fontSize: 15,
+    fontSize: 13,
+    fontWeight: '700',
   },
   allDoneSubtitle: {
     ...Typography.caption,
     color: '#D2DDD5',
-    fontSize: 12,
+    fontSize: 10,
     textAlign: 'center',
-    marginTop: 2,
+    marginTop: 1,
   },
   bottomCaptionContainer: {
     position: 'absolute',
