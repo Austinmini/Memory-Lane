@@ -8,8 +8,10 @@ import {
   Animated,
   Dimensions,
   Platform,
+  StatusBar as RNStatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { useKeepAwake } from 'expo-keep-awake';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { Colors, Typography, Spacing, Radius, TouchTargets } from '../constants';
@@ -41,6 +43,14 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
 }) => {
   // Keep the device screen awake indefinitely while Picture Frame Mode is active
   useKeepAwake();
+
+  // Hide system status bar (time, battery, signal) completely while in Picture Frame Mode
+  useEffect(() => {
+    RNStatusBar.setHidden(true, 'fade');
+    return () => {
+      RNStatusBar.setHidden(false, 'fade');
+    };
+  }, []);
 
   // Allow dynamic auto-rotation (portrait & landscape) while in Picture Frame Mode
   useEffect(() => {
@@ -306,6 +316,8 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
 
   return (
     <View style={styles.container}>
+      <StatusBar hidden={true} />
+
       {/* Background & Main Photo with Cross-Fade */}
       <TouchableOpacity
         style={StyleSheet.absoluteFill}
@@ -313,14 +325,25 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
         onPress={showControlsTemporarily}
       >
         {currentMemory ? (
-          <Animated.View style={[StyleSheet.absoluteFill, { opacity: fadeAnim }]}>
+          <Animated.View style={[StyleSheet.absoluteFill, styles.imageContainer, { opacity: fadeAnim }]}>
+            {/* Ambient blurred backdrop fills letterbox space seamlessly */}
             <Image
               source={{ uri: currentMemory.localImageUri }}
-              style={styles.fullImage}
+              style={styles.ambientBlurredBackground}
               resizeMode="cover"
+              blurRadius={Platform.OS === 'ios' ? 25 : 12}
             />
-            {/* Ambient Darkened Gradient Overlay at bottom for caption legibility */}
-            <View style={styles.scrimOverlay} />
+            <View style={styles.ambientDarkFilter} />
+
+            {/* Foreground Main Photo: 100% visible, centered, zero cropping */}
+            <Image
+              source={{ uri: currentMemory.localImageUri }}
+              style={styles.centeredPhoto}
+              resizeMode="contain"
+            />
+
+            {/* Subtle Gradient Shadow at bottom for title legibility */}
+            <View style={styles.scrimOverlay} pointerEvents="none" />
           </Animated.View>
         ) : (
           <View style={styles.emptyContainer}>
@@ -488,19 +511,38 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F1713',
+    backgroundColor: '#000000',
   },
-  fullImage: {
+  imageContainer: {
     width: '100%',
     height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000000',
+    overflow: 'hidden',
+  },
+  ambientBlurredBackground: {
+    ...StyleSheet.absoluteFill,
+    width: '100%',
+    height: '100%',
+    transform: [{ scale: 1.15 }],
+  },
+  ambientDarkFilter: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  },
+  centeredPhoto: {
+    width: '100%',
+    height: '100%',
+    zIndex: 2,
   },
   scrimOverlay: {
     position: 'absolute',
-    top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(15, 23, 19, 0.45)',
+    height: 140,
+    backgroundColor: 'rgba(0, 0, 0, 0.25)',
   },
   emptyContainer: {
     flex: 1,

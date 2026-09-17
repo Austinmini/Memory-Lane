@@ -264,6 +264,22 @@ export default function App() {
     );
   }
 
+  if (appMode === 'frame') {
+    return (
+      <SafeAreaProvider>
+        <View style={styles.frameContainer}>
+          <StatusBar hidden={true} />
+          <PictureFrameScreen
+            memories={memories}
+            reminders={reminders}
+            onExit={() => setAppMode('patient')}
+            onToggleReminder={handleToggleReminder}
+          />
+        </View>
+      </SafeAreaProvider>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.safeArea}>
@@ -283,7 +299,7 @@ export default function App() {
           onDismissVoiceModal={() => setIsPromptModalVisible(false)}
           onSelectMemoryForView={handleOpenEditMemory}
         />
-      ) : appMode === 'caregiver' ? (
+      ) : (
         <CaregiverDashboardScreen
           memories={memories}
           reminders={reminders}
@@ -298,13 +314,6 @@ export default function App() {
           statusLog={statusLog}
           onTriggerTestAlarm={handleTriggerTestNotification}
           onTriggerTestModal={handleOpenTestVoiceModal}
-        />
-      ) : (
-        <PictureFrameScreen
-          memories={memories}
-          reminders={reminders}
-          onExit={() => setAppMode('patient')}
-          onToggleReminder={handleToggleReminder}
         />
       )}
 
@@ -356,6 +365,10 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  frameContainer: {
+    flex: 1,
+    backgroundColor: '#000000',
   },
   loadingBox: {
     flex: 1,

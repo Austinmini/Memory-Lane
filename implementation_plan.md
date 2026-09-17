@@ -287,7 +287,7 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
   - **Scope**: Caregiver control panel with dedicated tabs for Family Memories, Daily Routines, Settings/Diagnostics, audio controls, and Google Play compliance disclaimers. Complete dual-mode navigation in `App.tsx`.
   - **Git Checkpoint**: `git commit -m "feat: complete caregiver dashboard and app navigation (Phase 5B)" && git push origin main`
 - **[COMPLETED] Phase 5C: Ambient Digital Picture Frame & Voice-Guided Reminder Mode**
-  - **Status**: Completed (Commits `50e13de`, `48f97ae`, `d7d33ac`, `a20242a`, `29dae04`, pushed to `origin/main`)
+  - **Status**: Completed (Commits `50e13de`, `48f97ae`, `d7d33ac`, `a20242a`, `29dae04`, `12bd9ed`, pushed to `origin/main`)
   - **Files**: `src/screens/PictureFrameScreen.tsx`, `src/screens/index.ts`, `src/screens/PatientHomeScreen.tsx`, `src/screens/CaregiverDashboardScreen.tsx`, `package.json`, `app.json`, `App.tsx`
   - **Scope**:
     1. Install `expo-keep-awake` to prevent screen sleep while in Picture Frame Mode.
@@ -297,6 +297,7 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
     5. Dynamic orientation via `expo-screen-orientation`: Enforces Portrait lock for Patient Home Screen and Caregiver Dashboard to prevent disorientation, while unlocking auto-rotation in Picture Frame Mode for tabletop docking and bedside nightstands.
     6. Modern safe area migration: Replaced deprecated React Native `SafeAreaView` with `react-native-safe-area-context` (`SafeAreaProvider` and `SafeAreaView`).
     7. Provide accessible entry/exit controls from Patient View and Caregiver Dashboard.
+    8. **Edge-to-Edge Fullscreen & Centered Display**: Bypassed outer SafeAreaView padding in `App.tsx` for Picture Frame Mode, concealed the system status bar (`RNStatusBar.setHidden(true)` + `StatusBar hidden={true}`), centered photos uniformly with `resizeMode="contain"` to prevent cropping, and integrated ambient blurred letterbox filling.
   - **Git Checkpoint**: `git commit -m "feat(screens): add ambient picture frame mode with voice reminders, title-only overlay, and dynamic orientation (Phase 5C)" && git push origin main`
 
 ---
