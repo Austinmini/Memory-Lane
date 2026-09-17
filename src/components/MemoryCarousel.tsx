@@ -10,7 +10,7 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
-import { Colors, Typography, Spacing, Radius, TouchTargets } from '../constants';
+import { Colors, Typography, Spacing, Radius, TouchTargets, resolveMemoryImageSource } from '../constants';
 import { MemoryRecord } from '../db/types';
 import { speakMemory, stopSpeaking, isSpeaking } from '../services/speechService';
 
@@ -154,9 +154,9 @@ export const MemoryCarousel: React.FC<MemoryCarouselProps> = ({
             <View style={styles.card}>
               {/* Photo Area */}
               <View style={styles.imageContainer}>
-                {item.localImageUri && !item.localImageUri.startsWith('seed_') ? (
+                {resolveMemoryImageSource(item.localImageUri) ? (
                   <Image
-                    source={{ uri: item.localImageUri }}
+                    source={resolveMemoryImageSource(item.localImageUri)!}
                     style={styles.image}
                     resizeMode="cover"
                   />

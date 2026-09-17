@@ -14,7 +14,7 @@ import {
   Switch,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { Colors, Typography, Spacing, Radius, TouchTargets } from '../constants';
+import { Colors, Typography, Spacing, Radius, TouchTargets, resolveMemoryImageSource } from '../constants';
 import { MemoryRecord } from '../db/types';
 import { MemoryRepository } from '../db/memoryRepository';
 import { saveImageToSandbox, deleteSandboxImage } from '../services/imageService';
@@ -300,7 +300,7 @@ export const EditMemoryScreen: React.FC<EditMemoryScreenProps> = ({
           {imageUri ? (
             <View style={styles.imagePreviewContainer}>
               <Image
-                source={{ uri: imageUri }}
+                source={resolveMemoryImageSource(imageUri) || { uri: imageUri }}
                 style={styles.previewImage}
                 resizeMode="cover"
               />

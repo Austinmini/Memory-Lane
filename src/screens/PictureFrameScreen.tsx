@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useKeepAwake } from 'expo-keep-awake';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import { Colors, Typography, Spacing, Radius, TouchTargets } from '../constants';
+import { Colors, Typography, Spacing, Radius, TouchTargets, resolveMemoryImageSource } from '../constants';
 import { MemoryRecord, ReminderRecord } from '../db/types';
 import { speakCalmly, speakMemory, stopSpeaking } from '../services/speechService';
 import {
@@ -376,20 +376,30 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
         {currentMemory ? (
           <Animated.View style={[StyleSheet.absoluteFill, styles.imageContainer, { opacity: fadeAnim }]}>
             {/* Ambient blurred backdrop fills letterbox space seamlessly */}
-            <Image
-              source={{ uri: currentMemory.localImageUri }}
-              style={styles.ambientBlurredBackground}
-              resizeMode="cover"
-              blurRadius={Platform.OS === 'ios' ? 25 : 12}
-            />
+            {resolveMemoryImageSource(currentMemory.localImageUri) ? (
+              <Image
+                source={resolveMemoryImageSource(currentMemory.localImageUri)!}
+                style={styles.ambientBlurredBackground}
+                resizeMode="cover"
+                blurRadius={Platform.OS === 'ios' ? 25 : 12}
+              />
+            ) : (
+              <View style={[styles.ambientBlurredBackground, { backgroundColor: '#1e2920' }]} />
+            )}
             <View style={styles.ambientDarkFilter} />
 
             {/* Foreground Main Photo: 100% visible, centered, zero cropping */}
-            <Image
-              source={{ uri: currentMemory.localImageUri }}
-              style={styles.centeredPhoto}
-              resizeMode="contain"
-            />
+            {resolveMemoryImageSource(currentMemory.localImageUri) ? (
+              <Image
+                source={resolveMemoryImageSource(currentMemory.localImageUri)!}
+                style={styles.centeredPhoto}
+                resizeMode="contain"
+              />
+            ) : (
+              <View style={[styles.centeredPhoto, { alignItems: 'center', justifyContent: 'center' }]}>
+                <Text style={{ fontSize: 64 }}>🖼️</Text>
+              </View>
+            )}
 
             {/* Subtle Gradient Shadow at bottom for title legibility */}
             <View style={styles.scrimOverlay} pointerEvents="none" />

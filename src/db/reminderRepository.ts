@@ -169,4 +169,34 @@ export const ReminderRepository = {
       }
     }
   },
+
+  /**
+   * Clears and resets routine reminders back to the comprehensive recommended schedule.
+   */
+  async resetToDefaults(): Promise<void> {
+    await initDatabase();
+    const db = await getDatabase();
+    await db.runAsync('DELETE FROM reminders;');
+    const now = Date.now();
+    for (const item of INITIAL_REMINDERS) {
+      await db.runAsync(
+        `INSERT INTO reminders (id, title, category, timeOfDay, spokenMessage, repeatDaily, isEnabled, isCompletedToday, lastCompletedDate, notificationId, createdAt, updatedAt)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+        [
+          item.id,
+          item.title,
+          item.category,
+          item.timeOfDay,
+          item.spokenMessage,
+          item.repeatDaily,
+          item.isEnabled,
+          item.isCompletedToday,
+          null,
+          null,
+          now,
+          now,
+        ]
+      );
+    }
+  },
 };

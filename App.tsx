@@ -11,7 +11,14 @@ import {
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Typography, Spacing, Radius } from './src/constants';
-import { MemoryRepository, ReminderRepository, MemoryRecord, ReminderRecord } from './src/db';
+import {
+  MemoryRepository,
+  ReminderRepository,
+  MemoryRecord,
+  ReminderRecord,
+  getSetting,
+  setSetting,
+} from './src/db';
 import {
   ensureMemoriesDirectoryExists,
   speakCalmly,
@@ -25,7 +32,7 @@ import {
   addNotificationReceivedListener,
   addNotificationResponseReceivedListener,
 } from './src/services';
-import { VoicePromptModal } from './src/components';
+import { VoicePromptModal, OnboardingGuideModal } from './src/components';
 import {
   EditMemoryScreen,
   EditReminderScreen,
@@ -51,6 +58,7 @@ export default function App() {
   const [isPromptModalVisible, setIsPromptModalVisible] = useState(false);
   const [isReminderEditorOpen, setIsReminderEditorOpen] = useState(false);
   const [selectedReminderForEdit, setSelectedReminderForEdit] = useState<ReminderRecord | null>(null);
+  const [isOnboardingGuideOpen, setIsOnboardingGuideOpen] = useState(false);
 
   const runDiagnostics = async () => {
     setLoading(true);
@@ -92,7 +100,13 @@ export default function App() {
         logs.push(`⚠️ Notification note: ${notifErr?.message || String(notifErr)}`);
       }
 
-      logs.push('🎉 Phase 4A Safe Local Notification Service Ready!');
+      // Check if user has seen onboarding guide
+      const seenGuide = await getSetting('has_seen_onboarding');
+      if (seenGuide !== 'true') {
+        setIsOnboardingGuideOpen(true);
+      }
+
+      logs.push('🎉 Phase 5D Sensible Defaults & Onboarding Ready!');
     } catch (err: any) {
       logs.push(`❌ Error: ${err?.message || String(err)}`);
     } finally {
@@ -248,6 +262,18 @@ export default function App() {
     setReminders(updated);
   };
 
+  const handleCloseOnboardingGuide = async () => {
+    setIsOnboardingGuideOpen(false);
+    await setSetting('has_seen_onboarding', 'true');
+  };
+
+  const handleResetRemindersToDefault = async () => {
+    await ReminderRepository.resetToDefaults();
+    const updated = await ReminderRepository.getAll();
+    setReminders(updated);
+    await syncAllReminderNotifications();
+  };
+
   if (loading) {
     return (
       <SafeAreaProvider>
@@ -314,6 +340,8 @@ export default function App() {
           statusLog={statusLog}
           onTriggerTestAlarm={handleTriggerTestNotification}
           onTriggerTestModal={handleOpenTestVoiceModal}
+          onOpenOnboardingGuide={() => setIsOnboardingGuideOpen(true)}
+          onResetRemindersToDefault={handleResetRemindersToDefault}
         />
       )}
 
@@ -355,6 +383,16 @@ export default function App() {
         reminder={activePromptReminder}
         onAcknowledge={handleAcknowledgeVoiceModal}
         onDismiss={() => setIsPromptModalVisible(false)}
+      />
+
+      {/* Onboarding Guide Modal (Phase 5D) */}
+      <OnboardingGuideModal
+        visible={isOnboardingGuideOpen}
+        onClose={handleCloseOnboardingGuide}
+        onOpenPictureFrame={() => {
+          handleCloseOnboardingGuide();
+          setAppMode('frame');
+        }}
       />
       </SafeAreaView>
     </SafeAreaProvider>

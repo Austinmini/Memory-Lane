@@ -53,9 +53,45 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
       updatedAt INTEGER NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key TEXT PRIMARY KEY NOT NULL,
+      value TEXT NOT NULL
+    );
+
     CREATE INDEX IF NOT EXISTS idx_memories_favorite ON memories (isFavorite DESC, sortOrder ASC);
     CREATE INDEX IF NOT EXISTS idx_reminders_enabled ON reminders (isEnabled, timeOfDay ASC);
   `);
 
   return db;
+}
+
+/**
+ * Retrieves a persistent string setting from app_settings.
+ */
+export async function getSetting(key: string, defaultValue?: string): Promise<string | undefined> {
+  try {
+    const db = await getDatabase();
+    const row = await db.getFirstAsync<{ value: string }>(
+      'SELECT value FROM app_settings WHERE key = ?;',
+      [key]
+    );
+    return row ? row.value : defaultValue;
+  } catch {
+    return defaultValue;
+  }
+}
+
+/**
+ * Persists a key-value setting in app_settings.
+ */
+export async function setSetting(key: string, value: string): Promise<void> {
+  try {
+    const db = await getDatabase();
+    await db.runAsync(
+      'INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?);',
+      [key, value]
+    );
+  } catch (err) {
+    console.warn('Failed to save setting', key, err);
+  }
 }
