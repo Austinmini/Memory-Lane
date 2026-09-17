@@ -60,6 +60,7 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
   const [syncSuccessMessage, setSyncSuccessMessage] = useState<string>('');
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
   const [resettingRoutines, setResettingRoutines] = useState(false);
+  const [isChecklistDismissed, setIsChecklistDismissed] = useState(false);
 
   const handleSyncNotifications = async () => {
     setSyncingNotifications(true);
@@ -206,64 +207,83 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
         </View>
 
         {/* Special Callout for Caregiver Setup */}
-        <View style={styles.setupCalloutCard}>
-          <View style={styles.setupCalloutHeaderRow}>
-            <Text style={styles.setupCalloutIcon}>✨</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={[Typography.h3, { color: Colors.primary }]}>
-                Welcome! Setup Your Loved One's Companion
-              </Text>
-              <Text style={[Typography.caption, { color: Colors.textSecondary, marginTop: 2, lineHeight: 18 }]}>
-                We've provided 1 sample memory and 1 sample routine below. Personalize them before switching to Patient View.
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.setupChecklist}>
-            <View style={styles.setupCheckItem}>
-              <Text style={styles.setupCheckEmoji}>
-                {memories.length > 1 ? '✅' : '🖼️'}
-              </Text>
-              <Text style={[Typography.caption, { color: Colors.textPrimary, flex: 1, lineHeight: 18 }]}>
-                <Text style={{ fontWeight: '700' }}>1. Add Loved Ones' Photos:</Text> Add familiar family faces, grandchildren, and pets with stories ({memories.length} currently).
-              </Text>
-            </View>
-
-            <View style={styles.setupCheckItem}>
-              <Text style={styles.setupCheckEmoji}>
-                {reminders.length > 1 ? '✅' : '⏰'}
-              </Text>
-              <Text style={[Typography.caption, { color: Colors.textPrimary, flex: 1, lineHeight: 18 }]}>
-                <Text style={{ fontWeight: '700' }}>2. Set Daily Routine Alarms:</Text> Configure medications, meals, and hydration with spoken reminders ({reminders.length} currently).
-              </Text>
+        {!isChecklistDismissed && (
+          <View style={styles.setupCalloutCard}>
+            <View style={styles.setupCalloutHeaderRow}>
+              <Text style={styles.setupCalloutIcon}>✨</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[Typography.h3, { color: Colors.primary }]}>
+                  Welcome! Setup Your Loved One's Companion
+                </Text>
+                <Text style={[Typography.caption, { color: Colors.textSecondary, marginTop: 2, lineHeight: 18 }]}>
+                  We've provided 1 sample memory and 1 sample routine below. Personalize them before switching to Patient View.
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.dismissChecklistButton}
+                onPress={() => setIsChecklistDismissed(true)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="Close setup checklist"
+              >
+                <Text style={styles.dismissChecklistText}>✕ Close</Text>
+              </TouchableOpacity>
             </View>
 
-            <View style={styles.setupCheckItem}>
-              <Text style={styles.setupCheckEmoji}>🕊️</Text>
-              <Text style={[Typography.caption, { color: Colors.textPrimary, flex: 1, lineHeight: 18 }]}>
-                <Text style={{ fontWeight: '700' }}>3. Switch to Patient View:</Text> When you are finished, tap "← Patient View" above to hand the device to your loved one.
-              </Text>
-            </View>
-          </View>
+            <View style={styles.setupChecklist}>
+              <View style={styles.setupCheckItem}>
+                <Text style={styles.setupCheckEmoji}>
+                  {memories.length > 1 ? '✅' : '🖼️'}
+                </Text>
+                <Text style={[Typography.caption, { color: Colors.textPrimary, flex: 1, lineHeight: 18 }]}>
+                  <Text style={{ fontWeight: '700' }}>1. Add Loved Ones' Photos:</Text> Add familiar family faces, grandchildren, and pets with stories ({memories.length} currently).
+                </Text>
+              </View>
 
-          <View style={styles.setupActionsRow}>
+              <View style={styles.setupCheckItem}>
+                <Text style={styles.setupCheckEmoji}>
+                  {reminders.length > 1 ? '✅' : '⏰'}
+                </Text>
+                <Text style={[Typography.caption, { color: Colors.textPrimary, flex: 1, lineHeight: 18 }]}>
+                  <Text style={{ fontWeight: '700' }}>2. Set Daily Routine Alarms:</Text> Configure medications, meals, and hydration with spoken reminders ({reminders.length} currently).
+                </Text>
+              </View>
+
+              <View style={styles.setupCheckItem}>
+                <Text style={styles.setupCheckEmoji}>🕊️</Text>
+                <Text style={[Typography.caption, { color: Colors.textPrimary, flex: 1, lineHeight: 18 }]}>
+                  <Text style={{ fontWeight: '700' }}>3. Switch to Patient View:</Text> When you are finished, tap "← Patient View" above to hand the device to your loved one.
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.setupActionsRow}>
+              <TouchableOpacity
+                style={[styles.primaryActionButton, { backgroundColor: Colors.primary, flex: 1 }]}
+                onPress={onAddMemory}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.primaryActionButtonText}>+ Add Photo Memory</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.primaryActionButton, { backgroundColor: Colors.accentWarm, flex: 1 }]}
+                onPress={onAddReminder}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.primaryActionButtonText}>+ Add Daily Routine</Text>
+              </TouchableOpacity>
+            </View>
+
             <TouchableOpacity
-              style={[styles.primaryActionButton, { backgroundColor: Colors.primary, flex: 1 }]}
-              onPress={onAddMemory}
-              activeOpacity={0.8}
+              style={styles.dismissLinkRow}
+              onPress={() => setIsChecklistDismissed(true)}
+              activeOpacity={0.7}
             >
-              <Text style={styles.primaryActionButtonText}>+ Add Photo Memory</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.primaryActionButton, { backgroundColor: Colors.accentWarm, flex: 1 }]}
-              onPress={onAddReminder}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.primaryActionButtonText}>+ Add Daily Routine</Text>
+              <Text style={styles.dismissLinkText}>Dismiss setup checklist</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        )}
 
         {/* Segmented Tabs Navigation */}
         <View style={styles.tabContainer}>
@@ -555,13 +575,13 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
               </View>
             </View>
 
-            {/* 2. Routine Alarms & Notification Scheduling */}
+            {/* 2. Routine Alarms & Sound Testing */}
             <View style={styles.settingsSectionCard}>
               <Text style={[Typography.h3, { color: Colors.primary, marginBottom: Spacing.xs }]}>
-                🔔 Routine Alarms & Notification Scheduling
+                🔔 Routine Alarms & Sound Testing
               </Text>
-              <Text style={[Typography.caption, { color: Colors.textSecondary, marginBottom: Spacing.md }]}>
-                Standard non-dangerous local notifications adhering strictly to Google Play battery and privacy policies.
+              <Text style={[Typography.caption, { color: Colors.textSecondary, marginBottom: Spacing.md, lineHeight: 19 }]}>
+                When scheduled times arrive, Memory Lane rings a gentle chime and announces the routine out loud. Use these tools to test your device's speaker volume and verify that alarms trigger properly before placing the tablet with your loved one.
               </Text>
 
               <View style={{ flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' }}>
@@ -581,7 +601,7 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
                     onPress={onTriggerTestModal}
                     activeOpacity={0.8}
                   >
-                    <Text style={styles.primaryActionButtonText}>📢 Test Alert Modal</Text>
+                    <Text style={styles.primaryActionButtonText}>📢 Preview Alert Popup</Text>
                   </TouchableOpacity>
                 )}
 
@@ -604,10 +624,18 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
                     activeOpacity={0.8}
                   >
                     <Text style={[styles.outlineButtonText, { color: Colors.accentWarm }]}>
-                      {resettingRoutines ? '⏳ Restoring...' : '♻️ Reset Recommended Schedule'}
+                      {resettingRoutines ? '⏳ Restoring...' : '♻️ Populate Recommended Schedule'}
                     </Text>
                   </TouchableOpacity>
                 )}
+              </View>
+
+              <View style={styles.alarmInfoBox}>
+                <Text style={[Typography.caption, { color: Colors.textSecondary, lineHeight: 18 }]}>
+                  • <Text style={{ fontWeight: '700' }}>Test 5-Sec Alarm:</Text> Rings a sample alarm in 5 seconds so you can check device volume.{'\n'}
+                  • <Text style={{ fontWeight: '700' }}>Preview Alert Popup:</Text> Displays the high-contrast voice reminder modal your loved one sees.{'\n'}
+                  • <Text style={{ fontWeight: '700' }}>Re-sync Alarms:</Text> Re-registers all routines with Android's system clock (useful after traveling or changing time zones).
+                </Text>
               </View>
 
               {syncSuccessMessage ? (
@@ -629,11 +657,24 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
               {/* Onboarding Guide Launch */}
               {onOpenOnboardingGuide && (
                 <TouchableOpacity
-                  style={[styles.primaryActionButton, { backgroundColor: Colors.primary, marginBottom: Spacing.md }]}
+                  style={[styles.primaryActionButton, { backgroundColor: Colors.primary, marginBottom: Spacing.sm }]}
                   onPress={onOpenOnboardingGuide}
                   activeOpacity={0.8}
                 >
                   <Text style={styles.primaryActionButtonText}>📖 How to Use Memory Lane (App Tour)</Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Show Setup Checklist If Dismissed */}
+              {isChecklistDismissed && (
+                <TouchableOpacity
+                  style={[styles.outlineButton, { marginBottom: Spacing.md, borderColor: Colors.accentWarm }]}
+                  onPress={() => setIsChecklistDismissed(false)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.outlineButtonText, { color: Colors.accentWarm }]}>
+                    ✨ Show Setup Checklist Again
+                  </Text>
                 </TouchableOpacity>
               )}
 
@@ -1114,5 +1155,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.sm,
     marginTop: Spacing.md,
+  },
+  dismissChecklistButton: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignSelf: 'flex-start',
+  },
+  dismissChecklistText: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  dismissLinkRow: {
+    alignItems: 'center',
+    marginTop: Spacing.sm,
+    paddingTop: Spacing.xs,
+  },
+  dismissLinkText: {
+    ...Typography.caption,
+    color: Colors.textMuted,
+    textDecorationLine: 'underline',
+    fontSize: 13,
+  },
+  alarmInfoBox: {
+    backgroundColor: Colors.surfaceMuted,
+    borderRadius: Radius.sm,
+    padding: Spacing.sm,
+    marginTop: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
   },
 });
