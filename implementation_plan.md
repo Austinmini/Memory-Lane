@@ -303,7 +303,7 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
     11. **Landscape Ambient Side Wings (Slim Non-Bleeding Layout)**: Dynamically responsive layout via `useWindowDimensions()`. In landscape, places a slim Clock & Date card in the left blurred wing and an Upcoming Routine glance card in the right blurred wing, hugging the screen edges (`left: 8px`, `right: 8px`) with dynamically clamped widths (`~92–132px`) so they never bleed into or overlap the central square photo. Tapping the upcoming routine card triggers gentle English speech narration. In portrait, gracefully adapts to a top-left ambient cluster.
   - **Git Checkpoint**: `git commit -m "feat(screens): add ambient picture frame mode with voice reminders, title-only overlay, and dynamic orientation (Phase 5C)" && git push origin main`
 - **[COMPLETED] Phase 5D: Sensible Defaults, Onboarding Guide, Settings Audit & Feedback**
-  - **Status**: Completed (Pending git checkpoint commit)
+  - **Status**: Completed (Commit `da5d5d2`, pushed to `origin/main`)
   - **Files**: `src/constants/defaultData.ts`, `src/components/OnboardingGuideModal.tsx`, `src/components/index.ts`, `src/screens/CaregiverDashboardScreen.tsx`, `src/screens/PictureFrameScreen.tsx`, `src/screens/EditMemoryScreen.tsx`, `src/components/MemoryCarousel.tsx`, `src/db/database.ts`, `src/db/reminderRepository.ts`, `App.tsx`, `assets/defaults/*`
   - **Scope**:
     1. **Sensible Defaults for Photos & Reminders**:
