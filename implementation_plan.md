@@ -287,17 +287,20 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
   - **Scope**: Caregiver control panel with dedicated tabs for Family Memories, Daily Routines, Settings/Diagnostics, audio controls, and Google Play compliance disclaimers. Complete dual-mode navigation in `App.tsx`.
   - **Git Checkpoint**: `git commit -m "feat: complete caregiver dashboard and app navigation (Phase 5B)" && git push origin main`
 - **[COMPLETED] Phase 5C: Ambient Digital Picture Frame & Voice-Guided Reminder Mode**
-  - **Status**: Completed (Commits `50e13de`, `48f97ae`, `d7d33ac`, `a20242a`, `29dae04`, `12bd9ed`, pushed to `origin/main`)
+  - **Status**: Completed (Commits `50e13de`, `48f97ae`, `d7d33ac`, `a20242a`, `29dae04`, `12bd9ed`, `5767ac4`, `906b108`, `3cdcbb6`, `6c06558`, `eddef93`, `50c0ca5`, `92e55d4`, pushed to `origin/main`)
   - **Files**: `src/screens/PictureFrameScreen.tsx`, `src/screens/index.ts`, `src/screens/PatientHomeScreen.tsx`, `src/screens/CaregiverDashboardScreen.tsx`, `package.json`, `app.json`, `App.tsx`
   - **Scope**:
     1. Install `expo-keep-awake` to prevent screen sleep while in Picture Frame Mode.
     2. Build full-screen ambient photo slideshow cycling through all memories with animated cross-fade.
-    3. Minimalist, distraction-free caption: displays **only the photo title** on a clean floating card (excluding relationship tags and story descriptions).
+    3. Minimalist, distraction-free caption: displays **only the photo title** on a clean centered floating card (excluding relationship tags and story descriptions).
     4. Foreground routine reminder announcements: Overlays gentle reminder prompt, announces the reminder out loud via English TTS, and includes a **sensible 60-second auto-return timeout** with progress timer to resume slideshow if not manually acknowledged.
     5. Dynamic orientation via `expo-screen-orientation`: Enforces Portrait lock for Patient Home Screen and Caregiver Dashboard to prevent disorientation, while unlocking auto-rotation in Picture Frame Mode for tabletop docking and bedside nightstands.
     6. Modern safe area migration: Replaced deprecated React Native `SafeAreaView` with `react-native-safe-area-context` (`SafeAreaProvider` and `SafeAreaView`).
     7. Provide accessible entry/exit controls from Patient View and Caregiver Dashboard.
     8. **Edge-to-Edge Fullscreen & Centered Display**: Bypassed outer SafeAreaView padding in `App.tsx` for Picture Frame Mode, concealed the system status bar (`RNStatusBar.setHidden(true)` + `StatusBar hidden={true}`), centered photos uniformly with `resizeMode="contain"` to prevent cropping, and integrated ambient blurred letterbox filling.
+    9. **Senior Accessibility & Clear Controls**: Renamed exit button to `"Exit"`, increased touch targets to 56dp (meeting dementia accessibility guidelines), enlarged speaker/pause icons (26px) and chevrons (36px). Added right-side inset clearance to prevent overlap with Expo Go's top-right floating developer widget.
+    10. **High-Prominence Home Entry with Play Graphic**: Repositioned the Picture Frame entry card above Section 1 directly beneath "Read Today's Schedule" in `PatientHomeScreen.tsx`, featuring a custom composite photo-frame + play badge graphic (`🖼️▶`) and high-contrast `Play ▶` action pill.
+    11. **Landscape Ambient Side Wings (Slim Non-Bleeding Layout)**: Dynamically responsive layout via `useWindowDimensions()`. In landscape, places a slim Clock & Date card in the left blurred wing and an Upcoming Routine glance card in the right blurred wing, hugging the screen edges (`left: 8px`, `right: 8px`) with dynamically clamped widths (`~92–132px`) so they never bleed into or overlap the central square photo. Tapping the upcoming routine card triggers gentle English speech narration. In portrait, gracefully adapts to a top-left ambient cluster.
   - **Git Checkpoint**: `git commit -m "feat(screens): add ambient picture frame mode with voice reminders, title-only overlay, and dynamic orientation (Phase 5C)" && git push origin main`
 
 ---
