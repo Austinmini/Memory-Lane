@@ -283,7 +283,7 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
 
   const handleSpeakCurrentMemory = () => {
     if (currentMemory) {
-      speakMemory(currentMemory.title, currentMemory.relationship, currentMemory.story);
+      speakCalmly(currentMemory.title);
     }
   };
 
@@ -400,31 +400,13 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
         </View>
       )}
 
-      {/* Bottom Memory Caption / Title Overlay */}
+      {/* Bottom Photo Title Overlay (Only picture title, no tag or description) */}
       {currentMemory && !activeReminder && (
         <View style={styles.bottomCaptionContainer} pointerEvents="box-none">
-          <View style={styles.captionCard}>
-            <View style={styles.captionHeaderRow}>
-              <View style={styles.titleWrap}>
-                {currentMemory.isFavorite === 1 && (
-                  <Text style={styles.starBadge}>⭐</Text>
-                )}
-                <Text style={[Typography.h1, styles.captionTitle]}>
-                  {currentMemory.title}
-                </Text>
-              </View>
-              <View style={styles.relationshipBadge}>
-                <Text style={styles.relationshipBadgeText}>
-                  {currentMemory.relationship}
-                </Text>
-              </View>
-            </View>
-
-            {currentMemory.story ? (
-              <Text style={[Typography.bodyLarge, styles.captionStory]} numberOfLines={2}>
-                {currentMemory.story}
-              </Text>
-            ) : null}
+          <View style={styles.titleCard}>
+            <Text style={[Typography.h1, styles.captionTitle]}>
+              {currentMemory.isFavorite === 1 ? '⭐ ' : ''}{currentMemory.title}
+            </Text>
           </View>
         </View>
       )}
@@ -629,53 +611,25 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl * 1.2,
     zIndex: 8,
   },
-  captionCard: {
-    backgroundColor: 'rgba(15, 23, 19, 0.85)',
-    borderRadius: Radius.lg,
-    padding: Spacing.lg,
+  titleCard: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(15, 23, 19, 0.82)',
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.25)',
     shadowColor: '#000',
     shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  captionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.xs,
-  },
-  titleWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    flex: 1,
-  },
-  starBadge: {
-    fontSize: 22,
+    shadowRadius: 10,
+    elevation: 6,
+    maxWidth: '92%',
   },
   captionTitle: {
     color: Colors.textInverse,
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '700',
-  },
-  relationshipBadge: {
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radius.full,
-  },
-  relationshipBadgeText: {
-    ...Typography.caption,
-    color: Colors.primary,
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  captionStory: {
-    color: '#E0E8E2',
-    marginTop: Spacing.xs,
-    lineHeight: 28,
+    letterSpacing: 0.3,
   },
   reminderOverlayBackdrop: {
     position: 'absolute',
