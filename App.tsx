@@ -33,6 +33,7 @@ import {
   CaregiverDashboardScreen,
   PictureFrameScreen,
 } from './src/screens';
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 // Configure notification presentation handler
 setupNotificationHandler();
@@ -99,6 +100,17 @@ export default function App() {
       setLoading(false);
     }
   };
+
+  // Enforce Portrait lock for Patient and Caregiver views to prevent disorientation from accidental tilts
+  useEffect(() => {
+    if (appMode !== 'frame') {
+      try {
+        ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
+      } catch {
+        // Safe fallback on web
+      }
+    }
+  }, [appMode]);
 
   useEffect(() => {
     runDiagnostics();

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useKeepAwake } from 'expo-keep-awake';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { Colors, Typography, Spacing, Radius, TouchTargets } from '../constants';
 import { MemoryRecord, ReminderRecord } from '../db/types';
 import { speakCalmly, speakMemory, stopSpeaking } from '../services/speechService';
@@ -40,6 +41,29 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
 }) => {
   // Keep the device screen awake indefinitely while Picture Frame Mode is active
   useKeepAwake();
+
+  // Allow dynamic auto-rotation (portrait & landscape) while in Picture Frame Mode
+  useEffect(() => {
+    const unlock = async () => {
+      try {
+        await ScreenOrientation.unlockAsync();
+      } catch {
+        // Safe fallback on web or unsupported environments
+      }
+    };
+    unlock();
+
+    return () => {
+      const lock = async () => {
+        try {
+          await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+        } catch {
+          // Safe fallback
+        }
+      };
+      lock();
+    };
+  }, []);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
