@@ -396,7 +396,7 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
                 activeOpacity={0.8}
                 accessibilityLabel="Exit picture frame mode"
               >
-                <Text style={styles.exitButtonText}>✕ Exit Frame</Text>
+                <Text style={styles.exitButtonText}>Exit</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -566,8 +566,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingLeft: Spacing.md,
+    paddingRight: Spacing.xl + 36, // Generous clearance so Expo Go floating dev menu widget doesn't collide
+    paddingTop: Platform.OS === 'android' ? Spacing.md + 6 : Spacing.md,
+    paddingBottom: Spacing.sm,
   },
   ambientClockBadge: {
     backgroundColor: 'rgba(15, 23, 19, 0.75)',
@@ -607,16 +609,17 @@ const styles = StyleSheet.create({
   },
   exitButton: {
     backgroundColor: 'rgba(15, 23, 19, 0.85)',
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
     borderRadius: Radius.full,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
   },
   exitButtonText: {
     ...Typography.button,
     color: Colors.textInverse,
     fontSize: 15,
+    fontWeight: '600',
   },
   chevronsOverlay: {
     position: 'absolute',
