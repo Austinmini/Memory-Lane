@@ -302,21 +302,32 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
     10. **High-Prominence Home Entry with Play Graphic**: Repositioned the Picture Frame entry card above Section 1 directly beneath "Read Today's Schedule" in `PatientHomeScreen.tsx`, featuring a custom composite photo-frame + play badge graphic (`🖼️▶`) and high-contrast `Play ▶` action pill.
     11. **Landscape Ambient Side Wings (Slim Non-Bleeding Layout)**: Dynamically responsive layout via `useWindowDimensions()`. In landscape, places a slim Clock & Date card in the left blurred wing and an Upcoming Routine glance card in the right blurred wing, hugging the screen edges (`left: 8px`, `right: 8px`) with dynamically clamped widths (`~92–132px`) so they never bleed into or overlap the central square photo. Tapping the upcoming routine card triggers gentle English speech narration. In portrait, gracefully adapts to a top-left ambient cluster.
   - **Git Checkpoint**: `git commit -m "feat(screens): add ambient picture frame mode with voice reminders, title-only overlay, and dynamic orientation (Phase 5C)" && git push origin main`
-- **[COMPLETED] Phase 5D: Sensible Defaults, Onboarding Guide, Settings Audit & Feedback**
-  - **Status**: Completed (Commit `da5d5d2`, pushed to `origin/main`)
-  - **Files**: `src/constants/defaultData.ts`, `src/components/OnboardingGuideModal.tsx`, `src/components/index.ts`, `src/screens/CaregiverDashboardScreen.tsx`, `src/screens/PictureFrameScreen.tsx`, `src/screens/EditMemoryScreen.tsx`, `src/components/MemoryCarousel.tsx`, `src/db/database.ts`, `src/db/reminderRepository.ts`, `App.tsx`, `assets/defaults/*`
+- **[COMPLETED] Phase 5D: Sensible Defaults, Onboarding Guide, Settings Audit, Caregiver Setup & Feedback**
+  - **Status**: Completed (Commits `da5d5d2`, `43dd985`, `b182351`, `41251d9`, `25d18e2`, pushed to `origin/main`)
+  - **Files**: `src/constants/defaultData.ts`, `src/components/OnboardingGuideModal.tsx`, `src/components/MemoryCarousel.tsx`, `src/components/index.ts`, `src/screens/CaregiverDashboardScreen.tsx`, `src/screens/PictureFrameScreen.tsx`, `src/screens/EditMemoryScreen.tsx`, `src/db/database.ts`, `src/db/reminderRepository.ts`, `App.tsx`, `assets/defaults/*`
   - **Scope**:
     1. **Sensible Defaults for Photos & Reminders**:
        - Bundled heartwarming sample image assets (`family_portrait.jpg`, `golden_retriever.jpg`, `lake_tahoe.jpg`) in `assets/defaults/` with `resolveMemoryImageSource()` utility so Carousel, Picture Frame, and Memory Editor immediately display authentic high-resolution imagery.
-       - Configured a comprehensive 7-routine medically thoughtful schedule (Morning Meds, Mid-day Hydration, Lunch, Afternoon Walk / Fresh Air, Afternoon Tea, Evening Meds & Dinner, Gentle Wind Down) with comforting spoken voice prompts.
-    2. **Caregiver & Patient Onboarding Guide**:
+       - Configured **1 sample memory** (*Sarah & Leo*) and **1 sample reminder** (*Morning Medication*) for initial state, with `RECOMMENDED_ROUTINES` export for on-demand 7-routine population.
+    2. **Fresh Install Landing in Caregiver Setup**:
+       - On a fresh install, `App.tsx` queries SQLite `app_settings` for `has_completed_initial_setup` and lands directly in **Caregiver Mode** so family caregivers can configure photos and routines before handing the device to their loved one.
+       - Switching to Patient View marks `has_completed_initial_setup` as complete so subsequent app opens land in serene Patient View.
+    3. **Caregiver Setup Checklist Banner & Dismiss**:
+       - Added prominent setup checklist card at the top of Caregiver Dashboard calling out the sample items and encouraging the caregiver to add loved ones' photos and daily alarms.
+       - Added `✕ Close` button and dismiss link to hide the checklist, with a `"✨ Show Setup Checklist Again"` button in Settings to re-open it if needed.
+       - Added gentle confirmation prompt when tapping `"← Patient View"` if only the sample items exist.
+    4. **Caregiver & Patient Onboarding Guide**:
        - Built accessible, illustrated multi-slide modal (`OnboardingGuideModal.tsx`) walking through dual modes, family memories, daily routine alarms, and digital picture frame docking.
-       - Persists `has_seen_onboarding` flag in SQLite `app_settings` to auto-prompt on first launch, with a permanent "📖 How to Use Memory Lane" guide button in Caregiver Settings.
-    3. **Settings Page Audit & Diagnostics Clean-up**:
-       - Reorganized Settings tab into caregiver-friendly cards: Preferences & Audio Previews, Routine Alarms & Scheduling (with "Reset Recommended Schedule"), Help & Caregiver Feedback, and Offline Privacy & Safety.
-       - Replaced exposed developer logs with a collapsed "Advanced Troubleshooting / System Log" accordion.
-    4. **Caregiver Feedback via Email**:
-       - Added "💬 Send Caregiver Feedback" card in Caregiver Settings with native `mailto:` integration, pre-populated subject, and diagnostic device context, along with a "View Support Email" alert fallback.
+       - Persists `has_seen_onboarding` flag in SQLite `app_settings` to auto-prompt on first launch, with a permanent `"📖 How to Use Memory Lane"` guide button in Caregiver Settings.
+    5. **Settings Page Audit & Sound Testing Clarification**:
+       - Reorganized Settings into caregiver-friendly cards: Preferences & Audio Previews, Routine Alarms & Sound Testing, Help & Caregiver Feedback, and Offline Privacy & Safety.
+       - Replaced developer/legal jargon on alarms with clear explanations of why testing is helpful and what each button does (Test 5-Sec Alarm, Preview Alert Popup, Re-sync Alarms, Populate Recommended Schedule).
+       - Replaced exposed developer logs with a collapsed `"Advanced Troubleshooting / System Log"` accordion.
+    6. **Caregiver Feedback via Email**:
+       - Configured dedicated feedback channel to `unemployedasiandad@gmail.com` via native `mailto:` with pre-populated subject and device diagnostic context, plus an instant copyable dialog fallback.
+    7. **Removal of Redundant Auto-Play in Patient Carousel**:
+       - Removed `isAutoPlayActive`, `autoPlayTimerRef`, `toggleAutoPlay`, and auto-advance timers from `MemoryCarousel.tsx`.
+       - Removed the `⏸ Pause Slideshow` / `▶ Auto-Play` toggle button from the patient carousel to keep it simple, self-paced, and distraction-free, leaving automatic slideshow playback exclusively to the dedicated Digital Picture Frame Mode (`🖼️▶`).
   - **Git Checkpoint**: `git commit -m "feat: add sensible defaults, onboarding guide, settings audit, and feedback (Phase 5D)" && git push origin main`
 
 ---
