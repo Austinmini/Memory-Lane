@@ -31,6 +31,7 @@ import {
   EditReminderScreen,
   PatientHomeScreen,
   CaregiverDashboardScreen,
+  PictureFrameScreen,
 } from './src/screens';
 
 // Configure notification presentation handler
@@ -38,7 +39,7 @@ setupNotificationHandler();
 
 export default function App() {
   const [loading, setLoading] = useState(true);
-  const [appMode, setAppMode] = useState<'patient' | 'caregiver'>('patient');
+  const [appMode, setAppMode] = useState<'patient' | 'caregiver' | 'frame'>('patient');
   const [statusLog, setStatusLog] = useState<string[]>([]);
   const [memories, setMemories] = useState<MemoryRecord[]>([]);
   const [reminders, setReminders] = useState<ReminderRecord[]>([]);
@@ -262,6 +263,7 @@ export default function App() {
           reminders={reminders}
           onToggleReminder={handleToggleReminder}
           onOpenCaregiverMode={() => setAppMode('caregiver')}
+          onOpenPictureFrame={() => setAppMode('frame')}
           onRefresh={runDiagnostics}
           activePromptReminder={activePromptReminder}
           isPromptModalVisible={isPromptModalVisible}
@@ -269,11 +271,12 @@ export default function App() {
           onDismissVoiceModal={() => setIsPromptModalVisible(false)}
           onSelectMemoryForView={handleOpenEditMemory}
         />
-      ) : (
+      ) : appMode === 'caregiver' ? (
         <CaregiverDashboardScreen
           memories={memories}
           reminders={reminders}
           onReturnToPatientView={() => setAppMode('patient')}
+          onOpenPictureFrame={() => setAppMode('frame')}
           onAddMemory={handleOpenAddMemory}
           onEditMemory={handleOpenEditMemory}
           onAddReminder={handleOpenAddReminder}
@@ -283,6 +286,13 @@ export default function App() {
           statusLog={statusLog}
           onTriggerTestAlarm={handleTriggerTestNotification}
           onTriggerTestModal={handleOpenTestVoiceModal}
+        />
+      ) : (
+        <PictureFrameScreen
+          memories={memories}
+          reminders={reminders}
+          onExit={() => setAppMode('patient')}
+          onToggleReminder={handleToggleReminder}
         />
       )}
 

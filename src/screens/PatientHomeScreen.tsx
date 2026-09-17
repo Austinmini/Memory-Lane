@@ -28,6 +28,7 @@ export interface PatientHomeScreenProps {
   onAcknowledgeVoiceModal?: (reminder: ReminderRecord | null) => void;
   onDismissVoiceModal?: () => void;
   onSelectMemoryForView?: (memory: MemoryRecord) => void;
+  onOpenPictureFrame?: () => void;
 }
 
 export const PatientHomeScreen: React.FC<PatientHomeScreenProps> = ({
@@ -41,6 +42,7 @@ export const PatientHomeScreen: React.FC<PatientHomeScreenProps> = ({
   onAcknowledgeVoiceModal,
   onDismissVoiceModal,
   onSelectMemoryForView,
+  onOpenPictureFrame,
 }) => {
   const [isLockModalVisible, setIsLockModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -165,10 +167,30 @@ export const PatientHomeScreen: React.FC<PatientHomeScreenProps> = ({
         </Text>
 
         {memories.length > 0 ? (
-          <MemoryCarousel
-            memories={memories}
-            onMemoryPress={onSelectMemoryForView}
-          />
+          <>
+            <MemoryCarousel
+              memories={memories}
+              onMemoryPress={onSelectMemoryForView}
+            />
+            {onOpenPictureFrame && (
+              <TouchableOpacity
+                style={styles.pictureFrameButton}
+                onPress={onOpenPictureFrame}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Start Picture Frame ambient slideshow"
+              >
+                <Text style={styles.pictureFrameEmoji}>🖼️</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.pictureFrameTitle}>Digital Picture Frame</Text>
+                  <Text style={styles.pictureFrameSubtitle}>
+                    Continuous full-screen slideshow with scheduled voice reminders
+                  </Text>
+                </View>
+                <Text style={styles.pictureFrameChevron}>›</Text>
+              </TouchableOpacity>
+            )}
+          </>
         ) : (
           <View style={styles.emptyCard}>
             <Text style={styles.emptyIcon}>📷</Text>
@@ -405,5 +427,40 @@ const styles = StyleSheet.create({
   emptyIcon: {
     fontSize: 44,
     marginBottom: Spacing.sm,
+  },
+  pictureFrameButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.sm,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    minHeight: TouchTargets.minHeight,
+    gap: Spacing.md,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  pictureFrameEmoji: {
+    fontSize: 32,
+  },
+  pictureFrameTitle: {
+    ...Typography.bodyMediumBold,
+    color: Colors.primary,
+    fontSize: 18,
+  },
+  pictureFrameSubtitle: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  pictureFrameChevron: {
+    fontSize: 24,
+    color: Colors.primary,
+    fontWeight: '700',
   },
 });

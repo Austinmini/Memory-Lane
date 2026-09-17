@@ -29,6 +29,7 @@ export interface CaregiverDashboardScreenProps {
   statusLog?: string[];
   onTriggerTestAlarm?: () => Promise<void> | void;
   onTriggerTestModal?: () => void;
+  onOpenPictureFrame?: () => void;
 }
 
 type DashboardTab = 'memories' | 'routines' | 'settings';
@@ -46,6 +47,7 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
   statusLog = [],
   onTriggerTestAlarm,
   onTriggerTestModal,
+  onOpenPictureFrame,
 }) => {
   const [activeTab, setActiveTab] = useState<DashboardTab>('memories');
   const [syncingNotifications, setSyncingNotifications] = useState(false);
@@ -162,15 +164,28 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
                 </Text>
               </View>
 
-              <TouchableOpacity
-                style={styles.primaryActionButton}
-                onPress={onAddMemory}
-                activeOpacity={0.8}
-                accessibilityRole="button"
-                accessibilityLabel="Add New Memory"
-              >
-                <Text style={styles.primaryActionButtonText}>+ Add Memory</Text>
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', gap: Spacing.sm }}>
+                {onOpenPictureFrame && memories.length > 0 && (
+                  <TouchableOpacity
+                    style={[styles.outlineButton, { minHeight: 46, paddingHorizontal: Spacing.md, borderRadius: Radius.full, borderColor: Colors.primary }]}
+                    onPress={onOpenPictureFrame}
+                    activeOpacity={0.8}
+                    accessibilityRole="button"
+                    accessibilityLabel="Launch Digital Picture Frame Mode"
+                  >
+                    <Text style={styles.outlineButtonText}>🖼️ Frame Mode</Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  style={styles.primaryActionButton}
+                  onPress={onAddMemory}
+                  activeOpacity={0.8}
+                  accessibilityRole="button"
+                  accessibilityLabel="Add New Memory"
+                >
+                  <Text style={styles.primaryActionButtonText}>+ Add Memory</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             {memories.length === 0 ? (
