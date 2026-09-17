@@ -41,15 +41,22 @@ To guarantee the fastest, hassle-free approval on Google Play, the app will adhe
 
 ## Proposed Architecture & Features
 
-### 1. Dual-Mode Interface: "Patient View" & "Caregiver Mode"
+### 1. Multi-Mode Interface: "Patient View", "Caregiver Mode" & "Digital Picture Frame Mode"
 - **Patient View (Default / Main)**:
-  - Ultra-clean, high-contrast, clutter-free screen.
+  - Ultra-clean, high-contrast, clutter-free screen locked in Portrait orientation to prevent disorientation from accidental tilts.
   - Shows current day of the week, date, and time of day (e.g. *"Today is Thursday, Morning"*).
-  - Prominent interactive **Memory Carousel** (swipeable with large arrow buttons and optional slow auto-advance).
+  - Prominent interactive **Memory Carousel** (swipeable with large arrow buttons and voice narration).
   - Upcoming or active task card with a large **"Listen"** (TTS voice readout) and **"Done"** button.
+  - Quick-launch button for **Digital Picture Frame Mode**.
 - **Caregiver Settings (Discreet / Lockable)**:
-  - Accessed via a gentle long-press or simple optional PIN.
-  - Caregivers can add/edit photos, write captions, assign relationships (e.g., "Sarah - Daughter"), and set reminder times and frequencies.
+  - Accessed via a gentle long-press or 4-digit PIN lock (`CaregiverLockModal`).
+  - Caregivers can add/edit photos, write captions, assign relationships, set reminder times and frequencies, and test notifications/diagnostics.
+- **Digital Picture Frame Mode (Ambient Tabletop / Bedside)**:
+  - Ambient full-screen photo slideshow cycling through all memories with animated cross-fade.
+  - Minimalist, distraction-free display: shows **only the picture title** on an elegant floating title card (omitting tags and descriptions).
+  - **Always-On Screen**: Integrates `expo-keep-awake` to prevent screen sleep while running on a nightstand or desk dock.
+  - **Dynamic Orientation**: Supports auto-rotation into landscape or portrait via `expo-screen-orientation` to fit horizontal tablet stands or vertical docks.
+  - **Voice-Over Routine Reminders**: Overlays scheduled reminders at alarm times, announces them aloud via English TTS, and provides a **sensible 60-second auto-dismiss timeout** to automatically resume the photo slideshow.
 
 ---
 
@@ -61,7 +68,7 @@ To guarantee the fastest, hassle-free approval on Google Play, the app will adhe
   - `relationship`: Badge tag (e.g., "Daughter & Grandson", "Wife", "Pet", "Old Home").
   - `story`: Short, warm sentence (e.g., "Sarah is your daughter. She lives nearby and loves gardening with you.").
   - `localImageUri`: Internal persistent path.
-  - `favorite`: Pinned to the top of the carousel.
+  - `isFavorite`: Pinned to the top of the carousel.
 - **Interactive Carousel**:
   - High resolution, rounded corners, large text.
   - **Voice Readout Button**: Pressing "Read Memory" uses English Text-to-Speech to gently read aloud who the person is and the story.
@@ -82,6 +89,7 @@ To guarantee the fastest, hassle-free approval on Google Play, the app will adhe
 - **Voice Playback Trigger**:
   - When a reminder triggers, the notification sounds.
   - When the app is opened or active, the in-app Voice Reminder Modal displays a large icon, high-contrast text, and automatically speaks the instruction out loud.
+  - In Picture Frame Mode, speaks reminders aloud over the slideshow with a 60s auto-return countdown timer.
   - Caregivers can customize the exact spoken message.
 
 ---
@@ -90,11 +98,14 @@ To guarantee the fastest, hassle-free approval on Google Play, the app will adhe
 
 | Area | Solution | Notes |
 | :--- | :--- | :--- |
-| **Framework** | React Native (Expo SDK 52, TypeScript) | Cross-platform ready (Android now, iOS later). Zero native setup required on Windows. |
+| **Framework** | React Native (Expo SDK 52/57, TypeScript) | Cross-platform ready (Android now, iOS later). Zero native setup required on Windows. |
 | **Database** | `expo-sqlite` | High-performance, fully offline, transactional SQL storage. |
 | **File Storage** | `expo-file-system` | Storing full-res memory photos locally in app sandbox. |
 | **Voice / TTS** | `expo-speech` | Built-in native speech synthesis (offline, high quality English). |
 | **Notifications** | `expo-notifications` | Local scheduled notifications without remote server dependencies. |
+| **Screen Wake Lock** | `expo-keep-awake` | Keeps display continuously illuminated in Picture Frame Mode. |
+| **Screen Orientation** | `expo-screen-orientation` | Locks portrait for patient safety; unlocks dynamic rotation for picture frame. |
+| **Safe Area Insets** | `react-native-safe-area-context` | Modern edge-to-edge support replacing deprecated RN `SafeAreaView`. |
 | **Image Picker** | `expo-image-picker` | System photo picker (Android 13+ compliant, 0 dangerous permissions). |
 | **UI Design** | Vanilla React Native StyleSheet + Calming Tokens | Dementia-friendly colors (Sage Green, Calming Warm White, Navy/Charcoal high contrast text, 20pt+ font sizes). |
 
@@ -276,14 +287,17 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
   - **Scope**: Caregiver control panel with dedicated tabs for Family Memories, Daily Routines, Settings/Diagnostics, audio controls, and Google Play compliance disclaimers. Complete dual-mode navigation in `App.tsx`.
   - **Git Checkpoint**: `git commit -m "feat: complete caregiver dashboard and app navigation (Phase 5B)" && git push origin main`
 - **[COMPLETED] Phase 5C: Ambient Digital Picture Frame & Voice-Guided Reminder Mode**
-  - **Status**: Completed (Commit `50e13de`, pushed to `origin/main`)
-  - **Files**: `src/screens/PictureFrameScreen.tsx`, `src/screens/index.ts`, `src/screens/PatientHomeScreen.tsx`, `src/screens/CaregiverDashboardScreen.tsx`, `package.json`, `App.tsx`
+  - **Status**: Completed (Commits `50e13de`, `48f97ae`, `d7d33ac`, `a20242a`, `29dae04`, pushed to `origin/main`)
+  - **Files**: `src/screens/PictureFrameScreen.tsx`, `src/screens/index.ts`, `src/screens/PatientHomeScreen.tsx`, `src/screens/CaregiverDashboardScreen.tsx`, `package.json`, `app.json`, `App.tsx`
   - **Scope**:
     1. Install `expo-keep-awake` to prevent screen sleep while in Picture Frame Mode.
-    2. Build full-screen ambient photo slideshow cycling through all memories with photo titles, relationship badges, and cross-fade animations.
-    3. Foreground routine reminder announcements: Overlays gentle reminder prompt, announces the reminder out loud via English TTS, and includes a **sensible 60-second auto-return timeout** with progress timer to resume slideshow if not manually acknowledged.
-    4. Provide accessible entry/exit controls from Patient View and Caregiver Dashboard.
-  - **Git Checkpoint**: `git commit -m "feat(screens): add ambient picture frame mode with voice reminders and screen wake (Phase 5C)" && git push origin main`
+    2. Build full-screen ambient photo slideshow cycling through all memories with animated cross-fade.
+    3. Minimalist, distraction-free caption: displays **only the photo title** on a clean floating card (excluding relationship tags and story descriptions).
+    4. Foreground routine reminder announcements: Overlays gentle reminder prompt, announces the reminder out loud via English TTS, and includes a **sensible 60-second auto-return timeout** with progress timer to resume slideshow if not manually acknowledged.
+    5. Dynamic orientation via `expo-screen-orientation`: Enforces Portrait lock for Patient Home Screen and Caregiver Dashboard to prevent disorientation, while unlocking auto-rotation in Picture Frame Mode for tabletop docking and bedside nightstands.
+    6. Modern safe area migration: Replaced deprecated React Native `SafeAreaView` with `react-native-safe-area-context` (`SafeAreaProvider` and `SafeAreaView`).
+    7. Provide accessible entry/exit controls from Patient View and Caregiver Dashboard.
+  - **Git Checkpoint**: `git commit -m "feat(screens): add ambient picture frame mode with voice reminders, title-only overlay, and dynamic orientation (Phase 5C)" && git push origin main`
 
 ---
 
