@@ -302,6 +302,26 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
     10. **High-Prominence Home Entry with Play Graphic**: Repositioned the Picture Frame entry card above Section 1 directly beneath "Read Today's Schedule" in `PatientHomeScreen.tsx`, featuring a custom composite photo-frame + play badge graphic (`🖼️▶`) and high-contrast `Play ▶` action pill.
     11. **Landscape Ambient Side Wings (Slim Non-Bleeding Layout)**: Dynamically responsive layout via `useWindowDimensions()`. In landscape, places a slim Clock & Date card in the left blurred wing and an Upcoming Routine glance card in the right blurred wing, hugging the screen edges (`left: 8px`, `right: 8px`) with dynamically clamped widths (`~92–132px`) so they never bleed into or overlap the central square photo. Tapping the upcoming routine card triggers gentle English speech narration. In portrait, gracefully adapts to a top-left ambient cluster.
   - **Git Checkpoint**: `git commit -m "feat(screens): add ambient picture frame mode with voice reminders, title-only overlay, and dynamic orientation (Phase 5C)" && git push origin main`
+- **Phase 5D: Sensible Defaults, Onboarding Guide, Settings Audit & Feedback**
+  - **Files**: `src/constants/defaultData.ts`, `src/components/OnboardingGuideModal.tsx`, `src/components/index.ts`, `src/screens/CaregiverDashboardScreen.tsx`, `src/screens/PatientHomeScreen.tsx`, `App.tsx`, `assets/defaults/*`
+  - **Scope**:
+    1. **Sensible Defaults for Photos & Reminders**:
+       - Bundle heartwarming sample image assets (e.g. family portrait, loyal pet, serene nature) in `assets/defaults/` to replace missing string stubs so first-time users immediately see authentic imagery in both Carousel and Picture Frame slideshows.
+       - Provide a comprehensive, medically thoughtful daily routine schedule (Morning Medication, Mid-day Hydration, Lunch, Afternoon Walk / Fresh Air, Afternoon Tea, Evening Medication / Dinner, Evening Wind Down) with warm, patient spoken voice prompts.
+    2. **Caregiver & Patient Onboarding Guide**:
+       - Create an accessible, illustrated modal (`OnboardingGuideModal.tsx`) walking through:
+         - The distinction between serene Patient View vs. PIN-protected Caregiver Dashboard.
+         - How to add family memories with captions, relationships, and voice stories.
+         - How to configure daily routine reminders and spoken prompts.
+         - How to launch and dock the device in Ambient Digital Picture Frame Mode.
+       - Auto-prompt gently on initial launch and provide a permanent "📖 How to Use Memory Lane" entry in the Caregiver Dashboard.
+    3. **Settings Page Audit & Diagnostics Clean-up**:
+       - **Audit Finding**: Raw SQLite migrations and notification logs are currently exposed on the primary Caregiver Settings tab, which looks like developer debugging clutter and may alarm non-technical family caregivers.
+       - **Remediation**: Nest the raw diagnostics logs inside a collapsed "Advanced Troubleshooting / System Log" accordion. Reorganize the Settings tab into polished, caregiver-friendly cards: Preferences & Audio Previews, Routine Alarms & Sync, Help & Guides, Privacy & Safety Disclaimers.
+    4. **Caregiver Feedback via Email**:
+       - Add a dedicated "💬 Send Caregiver Feedback" card in the Caregiver Settings tab.
+       - Connects to native email client via `Linking.openURL('mailto:...')` with pre-populated subject (`Memory Lane Caregiver Feedback`) and diagnostic context (App version 1.0.0, Platform OS), with an instant "Copy Email" fallback for devices without a default mail app configured.
+  - **Git Checkpoint**: `git commit -m "feat: add sensible defaults, onboarding guide, settings audit, and feedback (Phase 5D)" && git push origin main`
 
 ---
 
