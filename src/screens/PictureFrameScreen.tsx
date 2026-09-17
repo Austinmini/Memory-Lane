@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -114,6 +114,46 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Find the next upcoming pending reminder for today
+  const upcomingReminder = useMemo(() => {
+    if (!reminders || reminders.length === 0) return null;
+
+    const enabled = reminders.filter((r) => r.isEnabled === 1);
+    if (enabled.length === 0) return null;
+
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    // Pending reminders today (not yet completed)
+    const pendingToday = enabled
+      .filter((r) => !r.isCompletedToday)
+      .map((r) => {
+        const parts = r.timeOfDay.split(':').map(Number);
+        const minutes = (parts[0] || 0) * 60 + (parts[1] || 0);
+        return { reminder: r, minutes };
+      })
+      .sort((a, b) => a.minutes - b.minutes);
+
+    // Prefer the first reminder scheduled for now or later today
+    const nextToday = pendingToday.find((item) => item.minutes >= currentMinutes);
+    if (nextToday) {
+      return nextToday.reminder;
+    }
+
+    // If there are pending reminders earlier today (overdue today), show the earliest
+    if (pendingToday.length > 0) {
+      return pendingToday[0].reminder;
+    }
+
+    return null;
+  }, [reminders, currentTimeStr]);
+
+  const handleSpeakUpcomingReminder = () => {
+    if (!upcomingReminder) return;
+    const msg = `Upcoming reminder: ${upcomingReminder.title} at ${formatDisplayTime(upcomingReminder.timeOfDay)}. ${upcomingReminder.spokenMessage}`;
+    speakCalmly(msg);
+  };
 
   // Auto-hide controls after 5 seconds of inactivity
   const showControlsTemporarily = () => {
@@ -361,10 +401,39 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
       {/* Top Ambient Bar (Always subtle, visible on touch) */}
       <SafeAreaView style={styles.topSafeArea} pointerEvents="box-none">
         <View style={styles.topBar}>
-          {/* Clock & Date Orientation Badge */}
-          <View style={styles.ambientClockBadge}>
-            <Text style={styles.ambientClockText}>{currentTimeStr}</Text>
-            <Text style={styles.ambientDateText}>{currentDateStr}</Text>
+          {/* Top Left Cluster: Clock Badge & Upcoming Reminder */}
+          <View style={styles.topLeftCluster} pointerEvents="box-none">
+            {/* Clock & Date Orientation Badge */}
+            <View style={styles.ambientClockBadge}>
+              <Text style={styles.ambientClockText}>{currentTimeStr}</Text>
+              <Text style={styles.ambientDateText}>{currentDateStr}</Text>
+            </View>
+
+            {/* Ambient Upcoming Reminder Glance Chip */}
+            {upcomingReminder && (
+              <TouchableOpacity
+                style={styles.upcomingReminderChip}
+                onPress={handleSpeakUpcomingReminder}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={`Upcoming reminder: ${upcomingReminder.title} at ${formatDisplayTime(upcomingReminder.timeOfDay)}`}
+              >
+                <Text style={styles.upcomingEmoji}>
+                  {getCategoryEmoji(upcomingReminder.category)}
+                </Text>
+                <View style={styles.upcomingTextWrap}>
+                  <View style={styles.upcomingTimeRow}>
+                    <Text style={styles.upcomingPrefix}>Upcoming ·</Text>
+                    <Text style={styles.upcomingTimeText}>
+                      {formatDisplayTime(upcomingReminder.timeOfDay)}
+                    </Text>
+                  </View>
+                  <Text style={styles.upcomingTitleText} numberOfLines={1}>
+                    {upcomingReminder.title}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Discreet Control Buttons */}
@@ -565,20 +634,26 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingLeft: Spacing.md,
+    alignItems: 'flex-start',
+    paddingLeft: 6, // Moved right to the left edge as requested
     paddingRight: Spacing.xl + 36, // Generous clearance so Expo Go floating dev menu widget doesn't collide
     paddingTop: Platform.OS === 'android' ? Spacing.md + 6 : Spacing.md,
     paddingBottom: Spacing.sm,
   },
+  topLeftCluster: {
+    alignItems: 'flex-start',
+    gap: 6,
+    maxWidth: '52%',
+  },
   ambientClockBadge: {
     backgroundColor: 'rgba(15, 23, 19, 0.82)',
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs + 2,
     borderRadius: Radius.full,
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.25)',
     justifyContent: 'center',
+    alignSelf: 'flex-start',
   },
   ambientClockText: {
     ...Typography.bodyMediumBold,
@@ -590,6 +665,55 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: '#D2DDD5',
     fontSize: 13,
+  },
+  upcomingReminderChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 19, 0.85)',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs + 2,
+    borderRadius: Radius.full,
+    borderWidth: 1.2,
+    borderColor: 'rgba(244, 180, 26, 0.45)', // Soft warm amber border
+    gap: Spacing.xs + 2,
+    alignSelf: 'flex-start',
+    maxWidth: '100%',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  upcomingEmoji: {
+    fontSize: 16,
+  },
+  upcomingTextWrap: {
+    flexShrink: 1,
+  },
+  upcomingTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  upcomingPrefix: {
+    ...Typography.caption,
+    color: '#C3D0C6',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  upcomingTimeText: {
+    ...Typography.caption,
+    color: Colors.accentWarm,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  upcomingTitleText: {
+    ...Typography.caption,
+    color: Colors.textInverse,
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: -1,
   },
   topActionsRow: {
     flexDirection: 'row',
