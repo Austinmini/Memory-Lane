@@ -153,6 +153,36 @@ export const PatientHomeScreen: React.FC<PatientHomeScreenProps> = ({
           </View>
         </TouchableOpacity>
 
+        {/* Digital Picture Frame Slideshow CTA (Higher prominence with Play graphic) */}
+        {onOpenPictureFrame && (
+          <TouchableOpacity
+            style={styles.pictureFrameButton}
+            onPress={onOpenPictureFrame}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Start Digital Picture Frame photo slideshow"
+          >
+            {/* Play Slideshow Graphic */}
+            <View style={styles.slideshowGraphicBox}>
+              <Text style={styles.graphicFrameEmoji}>🖼️</Text>
+              <View style={styles.playBadgeMini}>
+                <Text style={styles.playBadgeTriangle}>▶</Text>
+              </View>
+            </View>
+
+            <View style={{ flex: 1 }}>
+              <Text style={styles.pictureFrameTitle}>Digital Picture Frame</Text>
+              <Text style={styles.pictureFrameSubtitle}>
+                Play photo slideshow with scheduled reminders
+              </Text>
+            </View>
+
+            <View style={styles.playSlideshowPill}>
+              <Text style={styles.playSlideshowPillText}>Play ▶</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+
         {/* Section 1: Loved Ones & Memories Carousel */}
         <View style={styles.sectionHeaderRow}>
           <Text style={[Typography.h2, { color: Colors.primary }]}>
@@ -167,30 +197,10 @@ export const PatientHomeScreen: React.FC<PatientHomeScreenProps> = ({
         </Text>
 
         {memories.length > 0 ? (
-          <>
-            <MemoryCarousel
-              memories={memories}
-              onMemoryPress={onSelectMemoryForView}
-            />
-            {onOpenPictureFrame && (
-              <TouchableOpacity
-                style={styles.pictureFrameButton}
-                onPress={onOpenPictureFrame}
-                activeOpacity={0.8}
-                accessibilityRole="button"
-                accessibilityLabel="Start Picture Frame ambient slideshow"
-              >
-                <Text style={styles.pictureFrameEmoji}>🖼️</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.pictureFrameTitle}>Digital Picture Frame</Text>
-                  <Text style={styles.pictureFrameSubtitle}>
-                    Continuous full-screen slideshow with scheduled voice reminders
-                  </Text>
-                </View>
-                <Text style={styles.pictureFrameChevron}>›</Text>
-              </TouchableOpacity>
-            )}
-          </>
+          <MemoryCarousel
+            memories={memories}
+            onMemoryPress={onSelectMemoryForView}
+          />
         ) : (
           <View style={styles.emptyCard}>
             <Text style={styles.emptyIcon}>📷</Text>
@@ -434,19 +444,48 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
     padding: Spacing.md,
-    marginTop: Spacing.sm,
-    marginBottom: Spacing.sm,
+    marginTop: -Spacing.xs,
+    marginBottom: Spacing.lg,
     borderWidth: 1.5,
-    borderColor: Colors.border,
-    minHeight: TouchTargets.minHeight,
+    borderColor: Colors.primaryMuted,
+    minHeight: TouchTargets.largeButton,
     gap: Spacing.md,
     shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  pictureFrameEmoji: {
-    fontSize: 32,
+  slideshowGraphicBox: {
+    width: 52,
+    height: 52,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: Colors.primaryMuted,
+  },
+  graphicFrameEmoji: {
+    fontSize: 28,
+  },
+  playBadgeMini: {
+    position: 'absolute',
+    bottom: -3,
+    right: -3,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.surface,
+  },
+  playBadgeTriangle: {
+    color: Colors.textInverse,
+    fontSize: 10,
+    fontWeight: '900',
+    marginLeft: 2,
   },
   pictureFrameTitle: {
     ...Typography.bodyMediumBold,
@@ -457,10 +496,21 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.textSecondary,
     marginTop: 2,
+    fontSize: 14,
   },
-  pictureFrameChevron: {
-    fontSize: 24,
-    color: Colors.primary,
+  playSlideshowPill: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs + 3,
+    borderRadius: Radius.full,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  playSlideshowPillText: {
+    ...Typography.button,
+    color: Colors.textInverse,
+    fontSize: 15,
     fontWeight: '700',
   },
 });
