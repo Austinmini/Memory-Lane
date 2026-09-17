@@ -20,58 +20,28 @@ const IMAGE_HEIGHT = 240;
 
 export interface MemoryCarouselProps {
   memories: MemoryRecord[];
+  /**
+   * @deprecated Slideshow functionality is now handled by Digital Picture Frame mode.
+   */
   autoPlayIntervalSeconds?: number;
   onMemoryPress?: (memory: MemoryRecord) => void;
 }
 
 export const MemoryCarousel: React.FC<MemoryCarouselProps> = ({
   memories,
-  autoPlayIntervalSeconds = 12,
   onMemoryPress,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlayActive, setIsAutoPlayActive] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
   const flatListRef = useRef<FlatList<MemoryRecord>>(null);
-  const autoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Clean up timers & speech on unmount
+  // Clean up speech synthesis on unmount
   useEffect(() => {
     return () => {
-      if (autoPlayTimerRef.current) {
-        clearInterval(autoPlayTimerRef.current);
-      }
       stopSpeaking();
     };
   }, []);
-
-  // Handle auto-advance slideshow
-  useEffect(() => {
-    if (autoPlayTimerRef.current) {
-      clearInterval(autoPlayTimerRef.current);
-      autoPlayTimerRef.current = null;
-    }
-
-    if (isAutoPlayActive && memories.length > 1) {
-      autoPlayTimerRef.current = setInterval(() => {
-        setCurrentIndex((prevIndex) => {
-          const nextIndex = (prevIndex + 1) % memories.length;
-          flatListRef.current?.scrollToIndex({
-            index: nextIndex,
-            animated: true,
-          });
-          return nextIndex;
-        });
-      }, autoPlayIntervalSeconds * 1000);
-    }
-
-    return () => {
-      if (autoPlayTimerRef.current) {
-        clearInterval(autoPlayTimerRef.current);
-      }
-    };
-  }, [isAutoPlayActive, memories.length, autoPlayIntervalSeconds]);
 
   const goToNext = () => {
     if (memories.length === 0) return;
@@ -110,10 +80,6 @@ export const MemoryCarousel: React.FC<MemoryCarouselProps> = ({
       onStopped: () => setIsPlayingAudio(false),
       onError: () => setIsPlayingAudio(false),
     });
-  };
-
-  const toggleAutoPlay = () => {
-    setIsAutoPlayActive((prev) => !prev);
   };
 
   if (memories.length === 0) {
@@ -266,26 +232,11 @@ export const MemoryCarousel: React.FC<MemoryCarouselProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Slide Index Counter & Gentle Auto-Play Toggle */}
+      {/* Slide Index Counter */}
       <View style={styles.subControlRow}>
         <Text style={[Typography.caption, { color: Colors.textMuted }]}>
           Memory {currentIndex + 1} of {memories.length}
         </Text>
-
-        {memories.length > 1 && (
-          <TouchableOpacity
-            style={[
-              styles.autoPlayToggle,
-              isAutoPlayActive && { backgroundColor: Colors.primaryLight, borderColor: Colors.primary },
-            ]}
-            onPress={toggleAutoPlay}
-            activeOpacity={0.7}
-          >
-            <Text style={[Typography.caption, { color: isAutoPlayActive ? Colors.primary : Colors.textSecondary, fontWeight: '600' }]}>
-              {isAutoPlayActive ? '⏸ Pause Slideshow' : '▶ Auto-Play'}
-            </Text>
-          </TouchableOpacity>
-        )}
       </View>
     </View>
   );
@@ -450,16 +401,8 @@ const styles = StyleSheet.create({
   subControlRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     marginTop: Spacing.md,
     paddingHorizontal: Spacing.sm,
-  },
-  autoPlayToggle: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs + 2,
-    borderRadius: Radius.full,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.surface,
   },
 });
