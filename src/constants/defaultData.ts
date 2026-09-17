@@ -38,27 +38,25 @@ export const INITIAL_MEMORIES: Omit<MemoryRecord, 'createdAt' | 'updatedAt'>[] =
     isFavorite: 1,
     sortOrder: 0,
   },
-  {
-    id: 'mem_2',
-    title: 'Rusty',
-    relationship: 'Golden Retriever',
-    story: 'Rusty is your loyal golden retriever. He loves sunny walks in the park, chasing tennis balls across the lawn, and resting his head on your lap.',
-    localImageUri: 'default_pet',
-    isFavorite: 1,
-    sortOrder: 1,
-  },
-  {
-    id: 'mem_3',
-    title: 'Trip to Lake Tahoe',
-    relationship: 'Family Vacation',
-    story: 'You and the whole family took a sunny summer trip to Lake Tahoe. You sat on the wooden dock, drank warm tea, and watched the boats glide across the crystal blue water.',
-    localImageUri: 'default_nature',
-    isFavorite: 0,
-    sortOrder: 2,
-  },
 ];
 
 export const INITIAL_REMINDERS: Omit<ReminderRecord, 'createdAt' | 'updatedAt' | 'lastCompletedDate' | 'notificationId'>[] = [
+  {
+    id: 'rem_med_morning',
+    title: 'Morning Medication',
+    category: 'medication',
+    timeOfDay: '08:30',
+    spokenMessage: 'Good morning! It is time to take your morning medication with a fresh glass of water.',
+    repeatDaily: 1,
+    isEnabled: 1,
+    isCompletedToday: 0,
+  },
+];
+
+/**
+ * Recommended full 7-routine schedule that caregivers can populate on-demand.
+ */
+export const RECOMMENDED_ROUTINES: Omit<ReminderRecord, 'createdAt' | 'updatedAt' | 'lastCompletedDate' | 'notificationId'>[] = [
   {
     id: 'rem_med_morning',
     title: 'Morning Medication',

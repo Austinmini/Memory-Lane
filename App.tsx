@@ -47,7 +47,7 @@ setupNotificationHandler();
 
 export default function App() {
   const [loading, setLoading] = useState(true);
-  const [appMode, setAppMode] = useState<'patient' | 'caregiver' | 'frame'>('patient');
+  const [appMode, setAppMode] = useState<'patient' | 'caregiver' | 'frame'>('caregiver');
   const [statusLog, setStatusLog] = useState<string[]>([]);
   const [memories, setMemories] = useState<MemoryRecord[]>([]);
   const [reminders, setReminders] = useState<ReminderRecord[]>([]);
@@ -100,13 +100,21 @@ export default function App() {
         logs.push(`⚠️ Notification note: ${notifErr?.message || String(notifErr)}`);
       }
 
+      // Check if caregiver has completed initial setup; fresh install lands in Caregiver Mode
+      const hasCompletedSetup = await getSetting('has_completed_initial_setup');
+      if (hasCompletedSetup === 'true') {
+        setAppMode('patient');
+      } else {
+        setAppMode('caregiver');
+      }
+
       // Check if user has seen onboarding guide
       const seenGuide = await getSetting('has_seen_onboarding');
       if (seenGuide !== 'true') {
         setIsOnboardingGuideOpen(true);
       }
 
-      logs.push('🎉 Phase 5D Sensible Defaults & Onboarding Ready!');
+      logs.push('🎉 Phase 5D Sensible Defaults & Caregiver Setup Ready!');
     } catch (err: any) {
       logs.push(`❌ Error: ${err?.message || String(err)}`);
     } finally {
@@ -274,6 +282,11 @@ export default function App() {
     await syncAllReminderNotifications();
   };
 
+  const handleReturnToPatientView = async () => {
+    await setSetting('has_completed_initial_setup', 'true');
+    setAppMode('patient');
+  };
+
   if (loading) {
     return (
       <SafeAreaProvider>
@@ -329,7 +342,7 @@ export default function App() {
         <CaregiverDashboardScreen
           memories={memories}
           reminders={reminders}
-          onReturnToPatientView={() => setAppMode('patient')}
+          onReturnToPatientView={handleReturnToPatientView}
           onOpenPictureFrame={() => setAppMode('frame')}
           onAddMemory={handleOpenAddMemory}
           onEditMemory={handleOpenEditMemory}

@@ -78,7 +78,7 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
   };
 
   const handleSendFeedback = async () => {
-    const email = 'austinmini.dev@gmail.com';
+    const email = 'unemployedasiandad@gmail.com';
     const subject = encodeURIComponent('Memory Lane Caregiver Feedback');
     const body = encodeURIComponent(
       `Hello Memory Lane Team,\n\n[Please write your feedback, feature requests, or questions here]\n\n---\nDiagnostic Context:\nApp: Memory Lane v1.0.0\nPlatform: ${Platform.OS} (${Platform.Version})\nMode: Caregiver Dashboard`
@@ -108,7 +108,7 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
   const handleCopyEmail = () => {
     Alert.alert(
       'Caregiver Support Contact',
-      `Our dedicated email is:\naustinmini.dev@gmail.com\n\nSubject: Memory Lane Caregiver Feedback\n\nWe respond to all caregiver inquiries and suggestions!`,
+      `Our dedicated email is:\nunemployedasiandad@gmail.com\n\nSubject: Memory Lane Caregiver Feedback\n\nWe respond to all caregiver inquiries and suggestions!`,
       [{ text: 'Got It' }]
     );
   };
@@ -157,6 +157,24 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
     }
   };
 
+  const handlePressReturnToPatient = () => {
+    if (memories.length <= 1 || reminders.length <= 1) {
+      Alert.alert(
+        'Switch to Patient View?',
+        `You currently have ${memories.length} ${memories.length === 1 ? 'sample memory' : 'memories'} and ${reminders.length} ${reminders.length === 1 ? 'sample routine' : 'routines'} configured.\n\nBe sure to add your loved one's real family photos and daily schedule before handing them the device.\n\nReady to switch to Patient View now?`,
+        [
+          { text: 'Keep Setting Up', style: 'cancel' },
+          {
+            text: 'Switch to Patient View',
+            onPress: () => onReturnToPatientView(),
+          },
+        ]
+      );
+    } else {
+      onReturnToPatientView();
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -164,7 +182,7 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
         <View style={styles.topNavRow}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={onReturnToPatientView}
+            onPress={handlePressReturnToPatient}
             activeOpacity={0.8}
             accessibilityRole="button"
             accessibilityLabel="Return to Patient Home View"
@@ -185,6 +203,66 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
           <Text style={[Typography.caption, { color: Colors.textSecondary, marginTop: Spacing.xs }]}>
             Manage family memories, daily routine reminders, and device settings.
           </Text>
+        </View>
+
+        {/* Special Callout for Caregiver Setup */}
+        <View style={styles.setupCalloutCard}>
+          <View style={styles.setupCalloutHeaderRow}>
+            <Text style={styles.setupCalloutIcon}>✨</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[Typography.h3, { color: Colors.primary }]}>
+                Welcome! Setup Your Loved One's Companion
+              </Text>
+              <Text style={[Typography.caption, { color: Colors.textSecondary, marginTop: 2, lineHeight: 18 }]}>
+                We've provided 1 sample memory and 1 sample routine below. Personalize them before switching to Patient View.
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.setupChecklist}>
+            <View style={styles.setupCheckItem}>
+              <Text style={styles.setupCheckEmoji}>
+                {memories.length > 1 ? '✅' : '🖼️'}
+              </Text>
+              <Text style={[Typography.caption, { color: Colors.textPrimary, flex: 1, lineHeight: 18 }]}>
+                <Text style={{ fontWeight: '700' }}>1. Add Loved Ones' Photos:</Text> Add familiar family faces, grandchildren, and pets with stories ({memories.length} currently).
+              </Text>
+            </View>
+
+            <View style={styles.setupCheckItem}>
+              <Text style={styles.setupCheckEmoji}>
+                {reminders.length > 1 ? '✅' : '⏰'}
+              </Text>
+              <Text style={[Typography.caption, { color: Colors.textPrimary, flex: 1, lineHeight: 18 }]}>
+                <Text style={{ fontWeight: '700' }}>2. Set Daily Routine Alarms:</Text> Configure medications, meals, and hydration with spoken reminders ({reminders.length} currently).
+              </Text>
+            </View>
+
+            <View style={styles.setupCheckItem}>
+              <Text style={styles.setupCheckEmoji}>🕊️</Text>
+              <Text style={[Typography.caption, { color: Colors.textPrimary, flex: 1, lineHeight: 18 }]}>
+                <Text style={{ fontWeight: '700' }}>3. Switch to Patient View:</Text> When you are finished, tap "← Patient View" above to hand the device to your loved one.
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.setupActionsRow}>
+            <TouchableOpacity
+              style={[styles.primaryActionButton, { backgroundColor: Colors.primary, flex: 1 }]}
+              onPress={onAddMemory}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.primaryActionButtonText}>+ Add Photo Memory</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.primaryActionButton, { backgroundColor: Colors.accentWarm, flex: 1 }]}
+              onPress={onAddReminder}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.primaryActionButtonText}>+ Add Daily Routine</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Segmented Tabs Navigation */}
@@ -997,5 +1075,44 @@ const styles = StyleSheet.create({
   emptyEmoji: {
     fontSize: 44,
     marginBottom: Spacing.sm,
+  },
+  setupCalloutCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
+    borderWidth: 1.5,
+    borderColor: Colors.accentWarm,
+    shadowColor: Colors.accentWarm,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  setupCalloutHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  setupCalloutIcon: {
+    fontSize: 26,
+    marginRight: Spacing.sm,
+  },
+  setupChecklist: {
+    gap: Spacing.xs,
+    marginVertical: Spacing.xs,
+  },
+  setupCheckItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  setupCheckEmoji: {
+    fontSize: 18,
+  },
+  setupActionsRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginTop: Spacing.md,
   },
 });

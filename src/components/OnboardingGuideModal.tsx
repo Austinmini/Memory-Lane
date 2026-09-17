@@ -45,12 +45,12 @@ const GUIDE_SLIDES: GuideSlide[] = [
       },
       {
         icon: '🔒',
-        title: 'Protected Caregiver Mode',
+        title: 'Protected Caregiver Setup',
         description:
-          'Tap or hold the Caregiver button and enter PIN 1234 to safely manage family memories, routine reminders, and device settings.',
+          'On first install, Memory Lane starts in Caregiver Mode so you can personalize photos and daily alarms before giving the device to your loved one.',
       },
     ],
-    tipText: 'Tip: You can customize your PIN anytime in Caregiver Mode.',
+    tipText: 'Tip: You can switch to Patient View anytime, and return using PIN 1234.',
   },
   {
     badge: 'Cherished Faces & Stories',
@@ -62,7 +62,7 @@ const GUIDE_SLIDES: GuideSlide[] = [
         icon: '📸',
         title: 'Add Family & Pet Photos',
         description:
-          'Select photos from your device gallery. We also bundled starter photos of family, pets, and scenic nature to get you started immediately.',
+          'We included 1 sample memory of Sarah & Leo to show how it works. Be sure to add your loved one\'s real family members and pets with photos and short stories.',
       },
       {
         icon: '🔊',
@@ -83,7 +83,7 @@ const GUIDE_SLIDES: GuideSlide[] = [
         icon: '💊',
         title: 'Medically Thoughtful Schedule',
         description:
-          'Preloaded with essential daily routines: Morning Meds, Mid-day Hydration, Warm Lunch, Afternoon Fresh Air, and Evening Rest.',
+          'We provided 1 sample routine for Morning Medication. Add your loved one\'s personal routines for hydration, lunch, walks, and evening rest.',
       },
       {
         icon: '🗣️',

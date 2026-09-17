@@ -1,6 +1,6 @@
 import { getDatabase, initDatabase } from './database';
 import { ReminderRecord } from './types';
-import { INITIAL_REMINDERS } from '../constants/defaultData';
+import { INITIAL_REMINDERS, RECOMMENDED_ROUTINES } from '../constants/defaultData';
 
 export const ReminderRepository = {
   /**
@@ -178,7 +178,7 @@ export const ReminderRepository = {
     const db = await getDatabase();
     await db.runAsync('DELETE FROM reminders;');
     const now = Date.now();
-    for (const item of INITIAL_REMINDERS) {
+    for (const item of RECOMMENDED_ROUTINES) {
       await db.runAsync(
         `INSERT INTO reminders (id, title, category, timeOfDay, spokenMessage, repeatDaily, isEnabled, isCompletedToday, lastCompletedDate, notificationId, createdAt, updatedAt)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
