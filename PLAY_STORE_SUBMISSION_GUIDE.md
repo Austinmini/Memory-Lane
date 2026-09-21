@@ -105,8 +105,10 @@ All assets are pre-formatted and ready in your `assets/` folder:
 | :--- | :--- | :--- | :--- |
 | **App Icon** | 512 x 512 px PNG, 32-bit | `assets/store-icon-512.png` | ✅ Ready (Exact 512x512) |
 | **Feature Graphic** | 1024 x 500 px PNG / JPEG | `assets/feature-graphic.png` | ✅ Ready (Exact 1024x500) |
-| **Phone Screenshots** | Minimum 2, 16:9 or 9:16 aspect ratio | Capture in emulator or Expo Go | 📷 Capture Patient Home & Picture Frame |
-| **Tablet Screenshots** | Recommended for 7" and 10" | Recommended for bedside Picture Frame | 📷 Capture Landscape Picture Frame |
+| **Phone Screenshot 1** | Patient Home (Time & Schedule) | `assets/screenshots/screenshot-1-home.png` | ✅ Ready (1080x1920) |
+| **Phone Screenshot 2** | Memory Carousel & Voice Narration | `assets/screenshots/screenshot-2-carousel.png` | ✅ Ready (1080x1920) |
+| **Phone Screenshot 3** | Voice Reminder Alert Modal | `assets/screenshots/screenshot-3-reminder.png` | ✅ Ready (1080x1920) |
+| **Phone Screenshot 4** | Ambient Digital Picture Frame | `assets/screenshots/screenshot-4-picture-frame.png` | ✅ Ready (1080x1920) |
 
 ---
 
