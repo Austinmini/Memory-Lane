@@ -44,6 +44,12 @@
           "color": "#1E4D38"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2ec1417f-8284-4a41-9c93-d4ecfab939bc"
+      }
+    },
+    "owner": "austinmini"
   }
 }
