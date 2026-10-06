@@ -1,4 +1,4 @@
-﻿# Memory Lane
+# Memory Lane
 
 **Memory Lane** is a local-first mobile companion designed to support individuals living with dementia (Alzheimer's / cognitive impairment) and provide peace of mind to their family caregivers.
 
@@ -13,3 +13,7 @@
 - **Storage**: expo-file-system
 - **Speech**: expo-speech
 - **Notifications**: expo-notifications
+
+## Store Deployment & Submission Guides
+- 🍏 [Apple App Store & TestFlight Guide](file:///c:/Users/unemp/OneDrive/Documents/github/Memory%20Lane/APP_STORE_SUBMISSION_GUIDE.md)
+- 🤖 [Google Play Store Guide](file:///c:/Users/unemp/OneDrive/Documents/github/Memory%20Lane/PLAY_STORE_SUBMISSION_GUIDE.md)
