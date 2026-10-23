@@ -24,6 +24,7 @@ import {
   speakVoiceSample,
   VoiceGender,
 } from '../services/speechService';
+import { playReminderAudio, stopAllAudio } from '../services/audioService';
 import { syncAllReminderNotifications } from '../services/notificationService';
 
 export interface CaregiverDashboardScreenProps {
@@ -71,12 +72,34 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
   const [isChecklistDismissed, setIsChecklistDismissed] = useState(false);
   const [selectedVoiceGender, setSelectedVoiceGender] = useState<VoiceGender>('female');
   const [isPlayingVoiceSample, setIsPlayingVoiceSample] = useState<VoiceGender | null>(null);
+  const [playingRoutineId, setPlayingRoutineId] = useState<string | null>(null);
 
   useEffect(() => {
     getVoiceGender().then((gender) => {
       setSelectedVoiceGender(gender);
     });
+
+    return () => {
+      stopAllAudio();
+    };
   }, []);
+
+  const handleToggleRoutineVoice = async (r: ReminderRecord) => {
+    if (playingRoutineId === r.id) {
+      await stopAllAudio();
+      setPlayingRoutineId(null);
+      return;
+    }
+
+    await stopAllAudio();
+    setPlayingRoutineId(r.id);
+    await playReminderAudio(r, {
+      onStart: () => setPlayingRoutineId(r.id),
+      onDone: () => setPlayingRoutineId(null),
+      onStopped: () => setPlayingRoutineId(null),
+      onError: () => setPlayingRoutineId(null),
+    });
+  };
 
   const handleSelectVoiceGender = async (gender: VoiceGender) => {
     setSelectedVoiceGender(gender);
@@ -515,21 +538,29 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
                       </View>
                     </View>
 
-                    {/* Completion status pill */}
-                    <View
-                      style={[
-                        styles.statusPill,
-                        r.isCompletedToday ? styles.statusPillDone : styles.statusPillPending,
-                      ]}
-                    >
-                      <Text
+                    {/* Completion and Voice Note badges */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
+                      {r.audioUri ? (
+                        <View style={styles.voiceNotePill}>
+                          <Text style={styles.voiceNotePillText}>🎙️ Voice Note</Text>
+                        </View>
+                      ) : null}
+
+                      <View
                         style={[
-                          styles.statusPillText,
-                          r.isCompletedToday ? styles.statusPillTextDone : styles.statusPillTextPending,
+                          styles.statusPill,
+                          r.isCompletedToday ? styles.statusPillDone : styles.statusPillPending,
                         ]}
                       >
-                        {r.isCompletedToday ? '✓ Done' : 'Pending'}
-                      </Text>
+                        <Text
+                          style={[
+                            styles.statusPillText,
+                            r.isCompletedToday ? styles.statusPillTextDone : styles.statusPillTextPending,
+                          ]}
+                        >
+                          {r.isCompletedToday ? '✓ Done' : 'Pending'}
+                        </Text>
+                      </View>
                     </View>
                   </View>
 
@@ -543,11 +574,29 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
                   {/* Actions */}
                   <View style={styles.cardActionsRow}>
                     <TouchableOpacity
-                      style={styles.outlineButton}
-                      onPress={() => speakCalmly(r.spokenMessage)}
+                      style={[
+                        styles.outlineButton,
+                        r.audioUri ? styles.voiceOutlineButton : undefined,
+                        playingRoutineId === r.id ? styles.playingOutlineButton : undefined,
+                      ]}
+                      onPress={() => handleToggleRoutineVoice(r)}
                       activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={playingRoutineId === r.id ? "Stop voice" : "Hear routine voice"}
                     >
-                      <Text style={styles.outlineButtonText}>🔊 Hear Voice</Text>
+                      <Text
+                        style={[
+                          styles.outlineButtonText,
+                          r.audioUri ? styles.voiceOutlineButtonText : undefined,
+                          playingRoutineId === r.id ? styles.playingOutlineButtonText : undefined,
+                        ]}
+                      >
+                        {playingRoutineId === r.id
+                          ? '⏹ Stop'
+                          : r.audioUri
+                          ? '🎙️ Hear Voice'
+                          : '🔊 Hear Voice'}
+                      </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -1130,6 +1179,20 @@ const styles = StyleSheet.create({
   statusPillTextPending: {
     color: Colors.accentWarm,
   },
+  voiceNotePill: {
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    borderRadius: Radius.full,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  voiceNotePillText: {
+    ...Typography.caption,
+    color: Colors.primary,
+    fontWeight: '700',
+    fontSize: 12,
+  },
   speechQuoteBox: {
     backgroundColor: Colors.surfaceMuted,
     borderRadius: Radius.sm,
@@ -1162,9 +1225,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  voiceOutlineButton: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryLight,
+  },
+  playingOutlineButton: {
+    backgroundColor: Colors.accentWarm,
+    borderColor: Colors.accentWarm,
+  },
   outlineButtonText: {
     ...Typography.caption,
     color: Colors.primary,
+    fontWeight: '700',
+  },
+  voiceOutlineButtonText: {
+    color: Colors.primary,
+    fontWeight: '700',
+  },
+  playingOutlineButtonText: {
+    color: Colors.textInverse,
     fontWeight: '700',
   },
   editButton: {
