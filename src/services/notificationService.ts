@@ -185,6 +185,7 @@ export async function scheduleReminderNotification(
           title: reminder.title,
           spokenMessage: reminder.spokenMessage,
           timeOfDay: reminder.timeOfDay,
+          audioUri: reminder.audioUri || null,
         },
       },
       trigger: {

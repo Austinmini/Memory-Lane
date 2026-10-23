@@ -49,6 +49,7 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
       isCompletedToday INTEGER NOT NULL DEFAULT 0,
       lastCompletedDate TEXT,
       notificationId TEXT,
+      audioUri TEXT,
       createdAt INTEGER NOT NULL,
       updatedAt INTEGER NOT NULL
     );
@@ -61,6 +62,17 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
     CREATE INDEX IF NOT EXISTS idx_memories_favorite ON memories (isFavorite DESC, sortOrder ASC);
     CREATE INDEX IF NOT EXISTS idx_reminders_enabled ON reminders (isEnabled, timeOfDay ASC);
   `);
+
+  // Schema migration: verify audioUri exists on existing SQLite databases
+  try {
+    const tableInfo = await db.getAllAsync<{ name: string }>('PRAGMA table_info(reminders);');
+    const hasAudioUri = tableInfo.some((col) => col.name === 'audioUri');
+    if (!hasAudioUri) {
+      await db.execAsync('ALTER TABLE reminders ADD COLUMN audioUri TEXT;');
+    }
+  } catch (migErr) {
+    console.warn('[database] Migration note on audioUri:', migErr);
+  }
 
   return db;
 }

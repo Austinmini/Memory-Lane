@@ -50,8 +50,8 @@ export const ReminderRepository = {
     };
 
     await db.runAsync(
-      `INSERT INTO reminders (id, title, category, timeOfDay, spokenMessage, repeatDaily, isEnabled, isCompletedToday, lastCompletedDate, notificationId, createdAt, updatedAt)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+      `INSERT INTO reminders (id, title, category, timeOfDay, spokenMessage, repeatDaily, isEnabled, isCompletedToday, lastCompletedDate, notificationId, audioUri, createdAt, updatedAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
         newRecord.id,
         newRecord.title,
@@ -63,6 +63,7 @@ export const ReminderRepository = {
         newRecord.isCompletedToday,
         newRecord.lastCompletedDate,
         newRecord.notificationId,
+        newRecord.audioUri || null,
         newRecord.createdAt,
         newRecord.updatedAt,
       ]
@@ -83,7 +84,7 @@ export const ReminderRepository = {
 
     await db.runAsync(
       `UPDATE reminders
-       SET title = ?, category = ?, timeOfDay = ?, spokenMessage = ?, repeatDaily = ?, isEnabled = ?, isCompletedToday = ?, lastCompletedDate = ?, notificationId = ?, updatedAt = ?
+       SET title = ?, category = ?, timeOfDay = ?, spokenMessage = ?, repeatDaily = ?, isEnabled = ?, isCompletedToday = ?, lastCompletedDate = ?, notificationId = ?, audioUri = ?, updatedAt = ?
        WHERE id = ?;`,
       [
         merged.title,
@@ -95,6 +96,7 @@ export const ReminderRepository = {
         merged.isCompletedToday,
         merged.lastCompletedDate,
         merged.notificationId,
+        merged.audioUri !== undefined ? merged.audioUri : (existing.audioUri || null),
         merged.updatedAt,
         id,
       ]
@@ -149,8 +151,8 @@ export const ReminderRepository = {
       const now = Date.now();
       for (const item of INITIAL_REMINDERS) {
         await db.runAsync(
-          `INSERT INTO reminders (id, title, category, timeOfDay, spokenMessage, repeatDaily, isEnabled, isCompletedToday, lastCompletedDate, notificationId, createdAt, updatedAt)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+          `INSERT INTO reminders (id, title, category, timeOfDay, spokenMessage, repeatDaily, isEnabled, isCompletedToday, lastCompletedDate, notificationId, audioUri, createdAt, updatedAt)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
           [
             item.id,
             item.title,
@@ -160,6 +162,7 @@ export const ReminderRepository = {
             item.repeatDaily,
             item.isEnabled,
             item.isCompletedToday,
+            null,
             null,
             null,
             now,
@@ -180,8 +183,8 @@ export const ReminderRepository = {
     const now = Date.now();
     for (const item of RECOMMENDED_ROUTINES) {
       await db.runAsync(
-        `INSERT INTO reminders (id, title, category, timeOfDay, spokenMessage, repeatDaily, isEnabled, isCompletedToday, lastCompletedDate, notificationId, createdAt, updatedAt)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+        `INSERT INTO reminders (id, title, category, timeOfDay, spokenMessage, repeatDaily, isEnabled, isCompletedToday, lastCompletedDate, notificationId, audioUri, createdAt, updatedAt)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
         [
           item.id,
           item.title,
@@ -191,6 +194,7 @@ export const ReminderRepository = {
           item.repeatDaily,
           item.isEnabled,
           item.isCompletedToday,
+          null,
           null,
           null,
           now,

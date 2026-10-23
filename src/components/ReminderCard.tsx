@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors, Typography, Spacing, Radius, TouchTargets } from '../constants';
 import { ReminderRecord } from '../db/types';
-import { speakCalmly, stopSpeaking, isSpeaking } from '../services/speechService';
+import { playReminderAudio, stopAllAudio } from '../services/audioService';
 
 export interface ReminderCardProps {
   reminder: ReminderRecord;
@@ -59,18 +59,18 @@ export const ReminderCard: React.FC<ReminderCardProps> = ({
   const isCompleted = !!reminder.isCompletedToday;
   const displayTime = formatDisplayTime(reminder.timeOfDay);
   const { emoji, label } = getCategoryInfo(reminder.category);
+  const hasVoiceNote = !!(reminder.audioUri && reminder.audioUri.trim().length > 0);
 
   const handleToggleVoice = async () => {
-    const speaking = await isSpeaking();
-    if (speaking && isPlayingAudio) {
-      await stopSpeaking();
+    if (isPlayingAudio) {
+      await stopAllAudio();
       setIsPlayingAudio(false);
       return;
     }
 
     onPressListen?.(reminder);
     setIsPlayingAudio(true);
-    await speakCalmly(reminder.spokenMessage, {
+    await playReminderAudio(reminder, {
       onStart: () => setIsPlayingAudio(true),
       onDone: () => setIsPlayingAudio(false),
       onStopped: () => setIsPlayingAudio(false),
@@ -99,6 +99,14 @@ export const ReminderCard: React.FC<ReminderCardProps> = ({
               {emoji} {label}
             </Text>
           </View>
+
+          {hasVoiceNote && (
+            <View style={styles.voiceNoteBadge}>
+              <Text style={[Typography.badge, { color: Colors.primary, fontWeight: '700' }]}>
+                🎙️ Voice Note
+              </Text>
+            </View>
+          )}
 
           {showEditButton && (
             <TouchableOpacity
@@ -157,9 +165,9 @@ export const ReminderCard: React.FC<ReminderCardProps> = ({
           accessibilityLabel={isPlayingAudio ? 'Stop speaking reminder' : 'Listen to spoken instructions'}
           accessibilityRole="button"
         >
-          <Text style={styles.actionIcon}>{isPlayingAudio ? '⏹' : '🔊'}</Text>
+          <Text style={styles.actionIcon}>{isPlayingAudio ? '⏹' : (hasVoiceNote ? '🎙️' : '🔊')}</Text>
           <Text style={[Typography.button, { color: Colors.textInverse, marginLeft: Spacing.xs + 2 }]}>
-            {isPlayingAudio ? 'Stop' : 'Listen'}
+            {isPlayingAudio ? 'Stop' : (hasVoiceNote ? 'Family Voice' : 'Listen')}
           </Text>
         </TouchableOpacity>
 
@@ -229,6 +237,14 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
     borderWidth: 1,
     borderColor: Colors.borderLight,
+  },
+  voiceNoteBadge: {
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: Spacing.sm + 2,
+    paddingVertical: Spacing.xs,
+    borderRadius: Radius.full,
+    borderWidth: 1,
+    borderColor: Colors.primary,
   },
   editButton: {
     width: 38,

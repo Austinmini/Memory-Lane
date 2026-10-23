@@ -21,6 +21,19 @@ import {
   parseTimeString,
 } from '../services/notificationService';
 import { speakCalmly, stopSpeaking, isSpeaking } from '../services/speechService';
+import {
+  useAudioRecorder,
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+} from 'expo-audio';
+import {
+  saveRoutineAudioToSandbox,
+  deleteRoutineAudio,
+  playAudioFile,
+  stopActiveAudio,
+  stopAllAudio,
+} from '../services/audioService';
 import { formatDisplayTime } from '../components/ReminderCard';
 
 export interface RoutineTemplate {
@@ -127,6 +140,26 @@ export const EditReminderScreen: React.FC<EditReminderScreenProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
 
+  // Caregiver Voice Recording states
+  const [audioUri, setAudioUri] = useState<string | null>(reminder?.audioUri || null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordDuration, setRecordDuration] = useState(0);
+  const [isPlayingAudioClip, setIsPlayingAudioClip] = useState(false);
+
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+
+  useEffect(() => {
+    let timer: any = null;
+    if (isRecording) {
+      timer = setInterval(() => {
+        setRecordDuration((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isRecording]);
+
   // Sync 12-hour picker to 'HH:mm' string
   const updateFormattedTimeOfDay = (hour12: number, minuteStr: string, ampm: 'AM' | 'PM') => {
     let hour24 = hour12 % 12;
@@ -150,10 +183,10 @@ export const EditReminderScreen: React.FC<EditReminderScreenProps> = ({
     updateFormattedTimeOfDay(selectedHour12, selectedMinute, ampm);
   };
 
-  // Stop TTS speech on unmount
+  // Stop TTS speech and audio on unmount
   useEffect(() => {
     return () => {
-      stopSpeaking();
+      stopAllAudio();
     };
   }, []);
 
@@ -197,6 +230,95 @@ export const EditReminderScreen: React.FC<EditReminderScreenProps> = ({
   };
 
   /**
+   * Start recording caregiver voice clip via microphone.
+   */
+  const handleStartRecording = async () => {
+    try {
+      await stopAllAudio();
+      setIsPlayingAudioClip(false);
+      setIsPlayingPreview(false);
+
+      const permission = await requestRecordingPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert(
+          'Microphone Permission Required',
+          'Microphone access is needed so you can record routine reminders in your own voice and language.'
+        );
+        return;
+      }
+
+      await setAudioModeAsync({
+        allowsRecording: true,
+        playsInSilentMode: true,
+      });
+
+      await recorder.prepareToRecordAsync();
+      recorder.record();
+      setIsRecording(true);
+      setRecordDuration(0);
+    } catch (err: any) {
+      Alert.alert('Recording Note', err?.message || 'Could not start recording. Please try again.');
+    }
+  };
+
+  /**
+   * Stop recording caregiver voice clip and store temporary recording URI.
+   */
+  const handleStopRecording = async () => {
+    try {
+      await recorder.stop();
+      setIsRecording(false);
+      if (recorder.uri) {
+        setAudioUri(recorder.uri);
+      }
+    } catch (err: any) {
+      Alert.alert('Recording Note', err?.message || 'Could not finish recording.');
+    }
+  };
+
+  /**
+   * Toggle playback preview of the caregiver's recorded voice clip.
+   */
+  const handleToggleAudioClipPreview = async () => {
+    if (isPlayingAudioClip) {
+      await stopActiveAudio();
+      setIsPlayingAudioClip(false);
+      return;
+    }
+
+    if (audioUri) {
+      setIsPlayingAudioClip(true);
+      await playAudioFile(audioUri, {
+        onStart: () => setIsPlayingAudioClip(true),
+        onDone: () => setIsPlayingAudioClip(false),
+        onError: () => setIsPlayingAudioClip(false),
+      });
+    }
+  };
+
+  /**
+   * Remove recorded audio and revert back to automated voice.
+   */
+  const handleRemoveAudioClip = () => {
+    Alert.alert(
+      'Remove Voice Recording?',
+      'This routine will revert to using the calming automated voice narration.',
+      [
+        { text: 'Keep Recording', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            stopActiveAudio();
+            setIsPlayingAudioClip(false);
+            setAudioUri(null);
+          },
+        },
+      ]
+    );
+  };
+
+  /**
    * Save reminder to SQLite and configure local notification scheduling.
    */
   const handleSave = async () => {
@@ -215,6 +337,16 @@ export const EditReminderScreen: React.FC<EditReminderScreenProps> = ({
     setIsSaving(true);
     try {
       const reminderId = reminder?.id || `rem_${Date.now()}`;
+
+      // Persist recorded voice clip into permanent sandbox directory
+      let finalAudioUri = audioUri;
+      if (audioUri && audioUri !== reminder?.audioUri) {
+        finalAudioUri = await saveRoutineAudioToSandbox(audioUri, reminderId);
+      } else if (!audioUri && reminder?.audioUri) {
+        await deleteRoutineAudio(reminder.audioUri);
+        finalAudioUri = null;
+      }
+
       let savedRecord: ReminderRecord;
 
       if (isEditing && reminder) {
@@ -225,6 +357,7 @@ export const EditReminderScreen: React.FC<EditReminderScreenProps> = ({
           spokenMessage: trimmedSpoken,
           repeatDaily: repeatDaily ? 1 : 0,
           isEnabled: isEnabled ? 1 : 0,
+          audioUri: finalAudioUri,
         });
 
         savedRecord = {
@@ -235,6 +368,7 @@ export const EditReminderScreen: React.FC<EditReminderScreenProps> = ({
           spokenMessage: trimmedSpoken,
           repeatDaily: repeatDaily ? 1 : 0,
           isEnabled: isEnabled ? 1 : 0,
+          audioUri: finalAudioUri,
           updatedAt: Date.now(),
         };
       } else {
@@ -249,6 +383,7 @@ export const EditReminderScreen: React.FC<EditReminderScreenProps> = ({
           isCompletedToday: 0,
           lastCompletedDate: null,
           notificationId: null,
+          audioUri: finalAudioUri,
         });
       }
 
@@ -289,6 +424,9 @@ export const EditReminderScreen: React.FC<EditReminderScreenProps> = ({
               setIsSaving(true);
               if (reminder.notificationId) {
                 await cancelReminderNotification(reminder.notificationId);
+              }
+              if (reminder.audioUri) {
+                await deleteRoutineAudio(reminder.audioUri);
               }
               await ReminderRepository.delete(reminder.id);
               onDelete?.(reminder.id);
@@ -511,13 +649,117 @@ export const EditReminderScreen: React.FC<EditReminderScreenProps> = ({
           </View>
         </View>
 
+        {/* Caregiver Personal Voice Recording Section */}
+        <View style={styles.card}>
+          <View style={styles.rowBetween}>
+            <Text style={[Typography.h3, { color: Colors.primary }]}>
+              🎙️ Caregiver Voice Recording
+            </Text>
+            {audioUri ? (
+              <View style={styles.activeAudioPill}>
+                <Text style={styles.activeAudioPillText}>✓ Your Voice Active</Text>
+              </View>
+            ) : null}
+          </View>
+          <Text style={[Typography.caption, { color: Colors.textSecondary, marginTop: Spacing.xs, marginBottom: Spacing.md, lineHeight: 18 }]}>
+            Record in your own voice and language. Hearing a familiar family voice provides deep reassurance and comfort for individuals with memory loss.
+          </Text>
+
+          {/* Recording UI State */}
+          {isRecording ? (
+            <View style={styles.recordingActiveBox}>
+              <View style={styles.recordingPulseRow}>
+                <View style={styles.recordingDot} />
+                <Text style={[Typography.bodyMediumBold, { color: Colors.danger }]}>
+                  Recording... {Math.floor(recordDuration / 60)}:{(recordDuration % 60) < 10 ? '0' : ''}{recordDuration % 60}
+                </Text>
+              </View>
+              <Text style={[Typography.caption, { color: Colors.textMuted, marginVertical: Spacing.xs }]}>
+                Speak gently and clearly into your microphone
+              </Text>
+              <TouchableOpacity
+                style={styles.stopRecordButton}
+                onPress={handleStopRecording}
+                activeOpacity={0.8}
+              >
+                <Text style={[Typography.button, { color: Colors.textInverse }]}>
+                  ⏹ Finish & Save Voice Recording
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : audioUri ? (
+            <View style={styles.audioAttachedBox}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.sm }}>
+                <Text style={{ fontSize: 24, marginRight: Spacing.xs }}>🎧</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={[Typography.bodyMediumBold, { color: Colors.textPrimary }]}>
+                    Personal Voice Clip Attached
+                  </Text>
+                  <Text style={[Typography.caption, { color: Colors.textMuted }]}>
+                    This voice clip will play when this routine reminder rings
+                  </Text>
+                </View>
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' }}>
+                <TouchableOpacity
+                  style={[
+                    styles.primaryActionButton,
+                    { flex: 1, minHeight: 46 },
+                    isPlayingAudioClip && { backgroundColor: Colors.accentWarm },
+                  ]}
+                  onPress={handleToggleAudioClipPreview}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.primaryActionButtonText}>
+                    {isPlayingAudioClip ? '⏹ Stop Audio' : '▶ Listen to Recording'}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.outlineButton}
+                  onPress={handleStartRecording}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.outlineButtonText}>🔄 Re-Record</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.outlineButton, { borderColor: Colors.danger }]}
+                  onPress={handleRemoveAudioClip}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.outlineButtonText, { color: Colors.danger }]}>🗑</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.recordNewButton}
+              onPress={handleStartRecording}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.recordNewEmoji}>🎙️</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[Typography.bodyMediumBold, { color: Colors.primary }]}>
+                  Record Your Own Voice Reminder
+                </Text>
+                <Text style={[Typography.caption, { color: Colors.textSecondary }]}>
+                  Tap to speak your instruction in your loved one's native language
+                </Text>
+              </View>
+              <Text style={[Typography.button, { color: Colors.primary, fontSize: 20 }]}>▶</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
         {/* Spoken Instruction Input & Audio Test */}
         <View style={styles.card}>
           <Text style={[Typography.h3, { color: Colors.textPrimary, marginBottom: Spacing.xs }]}>
-            Spoken Voice Message *
+            Spoken Voice Message (Fallback & On-Screen Text) *
           </Text>
           <Text style={[Typography.caption, { color: Colors.textMuted, marginBottom: Spacing.sm }]}>
-            Spoken aloud by the soothing voice engine when the reminder triggers.
+            Displayed on screen when reminder rings, and read aloud by the automated voice engine if no voice recording is attached.
           </Text>
 
           <TextInput
@@ -769,5 +1011,96 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: Spacing.sm,
+  },
+  activeAudioPill: {
+    backgroundColor: Colors.successLight,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    borderRadius: Radius.full,
+    borderWidth: 1,
+    borderColor: Colors.success,
+  },
+  activeAudioPillText: {
+    ...Typography.caption,
+    color: Colors.success,
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  recordingActiveBox: {
+    backgroundColor: Colors.dangerLight,
+    borderRadius: Radius.md,
+    borderWidth: 1.5,
+    borderColor: Colors.danger,
+    padding: Spacing.md,
+    alignItems: 'center',
+  },
+  recordingPulseRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  recordingDot: {
+    width: 12,
+    height: 12,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.danger,
+  },
+  stopRecordButton: {
+    backgroundColor: Colors.danger,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    minHeight: 46,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: Spacing.sm,
+    width: '100%',
+  },
+  audioAttachedBox: {
+    backgroundColor: Colors.surfaceElevated,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.md,
+  },
+  primaryActionButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.md,
+  },
+  primaryActionButtonText: {
+    ...Typography.button,
+    color: Colors.textInverse,
+    fontSize: 14,
+  },
+  outlineButton: {
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.md,
+    minHeight: 46,
+    backgroundColor: Colors.surfaceElevated,
+  },
+  outlineButtonText: {
+    ...Typography.button,
+    color: Colors.textPrimary,
+    fontSize: 14,
+  },
+  recordNewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Spacing.md,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: Radius.md,
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+  },
+  recordNewEmoji: {
+    fontSize: 28,
+    marginRight: Spacing.md,
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -15,7 +15,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Typography, Spacing, Radius, TouchTargets, resolveMemoryImageSource } from '../constants';
 import { MemoryRecord, ReminderRecord } from '../db/types';
 import { formatDisplayTime } from '../components/ReminderCard';
-import { speakCalmly, speakMemory, stopSpeaking } from '../services/speechService';
+import {
+  speakCalmly,
+  speakMemory,
+  stopSpeaking,
+  getVoiceGender,
+  setVoiceGender,
+  speakVoiceSample,
+  VoiceGender,
+} from '../services/speechService';
 import { syncAllReminderNotifications } from '../services/notificationService';
 
 export interface CaregiverDashboardScreenProps {
@@ -61,6 +69,28 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
   const [resettingRoutines, setResettingRoutines] = useState(false);
   const [isChecklistDismissed, setIsChecklistDismissed] = useState(false);
+  const [selectedVoiceGender, setSelectedVoiceGender] = useState<VoiceGender>('female');
+  const [isPlayingVoiceSample, setIsPlayingVoiceSample] = useState<VoiceGender | null>(null);
+
+  useEffect(() => {
+    getVoiceGender().then((gender) => {
+      setSelectedVoiceGender(gender);
+    });
+  }, []);
+
+  const handleSelectVoiceGender = async (gender: VoiceGender) => {
+    setSelectedVoiceGender(gender);
+    await setVoiceGender(gender);
+  };
+
+  const handleTestVoiceGender = async (gender: VoiceGender) => {
+    setIsPlayingVoiceSample(gender);
+    await speakVoiceSample(gender, {
+      onDone: () => setIsPlayingVoiceSample(null),
+      onStopped: () => setIsPlayingVoiceSample(null),
+      onError: () => setIsPlayingVoiceSample(null),
+    });
+  };
 
   const handleSyncNotifications = async () => {
     setSyncingNotifications(true);
@@ -552,26 +582,128 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
             {/* 1. Preferences & Audio Previews */}
             <View style={styles.settingsSectionCard}>
               <Text style={[Typography.h3, { color: Colors.primary, marginBottom: Spacing.xs }]}>
-                🔊 Voice Narration & Audio
+                🔊 Automated Voice Narration & Speech
               </Text>
-              <Text style={[Typography.caption, { color: Colors.textSecondary, marginBottom: Spacing.md }]}>
-                Calm English Text-to-Speech tuned for cognitive ease (gentle rate: 0.85, pitch: 1.0).
+              <Text style={[Typography.caption, { color: Colors.textSecondary, marginBottom: Spacing.md, lineHeight: 19 }]}>
+                Used to gently read aloud daily routines, reminders, and family stories when no custom voice recording is attached. Tuned for dementia care with relaxed pacing (0.85 rate).
               </Text>
-              <View style={{ flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' }}>
+
+              {/* Voice Gender Choice Row */}
+              <Text style={[Typography.caption, { color: Colors.textPrimary, fontWeight: '700', marginBottom: Spacing.xs }]}>
+                Select Voice Tone:
+              </Text>
+              <View style={styles.voiceGenderToggleRow}>
                 <TouchableOpacity
-                  style={[styles.primaryActionButton, { backgroundColor: Colors.primary }]}
-                  onPress={() => speakCalmly('Hello. This is the soothing English voice narration used for Memory Lane.')}
+                  style={[
+                    styles.voiceGenderButton,
+                    selectedVoiceGender === 'female' && styles.voiceGenderButtonActive,
+                  ]}
+                  onPress={() => handleSelectVoiceGender('female')}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.primaryActionButtonText}>🔊 Test Voice Narration</Text>
+                  <Text style={styles.voiceGenderEmoji}>👩</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={[
+                        Typography.bodyMediumBold,
+                        { color: selectedVoiceGender === 'female' ? Colors.textInverse : Colors.textPrimary },
+                      ]}
+                    >
+                      Female Voice
+                    </Text>
+                    <Text
+                      style={[
+                        Typography.caption,
+                        { color: selectedVoiceGender === 'female' ? 'rgba(255,255,255,0.85)' : Colors.textSecondary },
+                      ]}
+                    >
+                      Warm, gentle, and comforting
+                    </Text>
+                  </View>
+                  {selectedVoiceGender === 'female' && (
+                    <Text style={{ color: Colors.textInverse, fontWeight: '700' }}>✓</Text>
+                  )}
                 </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.voiceGenderButton,
+                    selectedVoiceGender === 'male' && styles.voiceGenderButtonActive,
+                  ]}
+                  onPress={() => handleSelectVoiceGender('male')}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.voiceGenderEmoji}>👨</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={[
+                        Typography.bodyMediumBold,
+                        { color: selectedVoiceGender === 'male' ? Colors.textInverse : Colors.textPrimary },
+                      ]}
+                    >
+                      Male Voice
+                    </Text>
+                    <Text
+                      style={[
+                        Typography.caption,
+                        { color: selectedVoiceGender === 'male' ? 'rgba(255,255,255,0.85)' : Colors.textSecondary },
+                      ]}
+                    >
+                      Calm, deeper, and grounding
+                    </Text>
+                  </View>
+                  {selectedVoiceGender === 'male' && (
+                    <Text style={{ color: Colors.textInverse, fontWeight: '700' }}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+
+              {/* Action Buttons: Sample Voice Narration */}
+              <View style={{ flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap', marginTop: Spacing.md }}>
+                <TouchableOpacity
+                  style={[
+                    styles.primaryActionButton,
+                    isPlayingVoiceSample === selectedVoiceGender && { backgroundColor: Colors.accentWarm },
+                  ]}
+                  onPress={() => handleTestVoiceGender(selectedVoiceGender)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.primaryActionButtonText}>
+                    {isPlayingVoiceSample === selectedVoiceGender ? '⏹ Stop Voice' : `▶ Listen to ${selectedVoiceGender === 'female' ? 'Female' : 'Male'} Voice`}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.outlineButton,
+                    isPlayingVoiceSample === (selectedVoiceGender === 'female' ? 'male' : 'female') && {
+                      borderColor: Colors.accentWarm,
+                    },
+                  ]}
+                  onPress={() => handleTestVoiceGender(selectedVoiceGender === 'female' ? 'male' : 'female')}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.outlineButtonText}>
+                    ▶ Sample {selectedVoiceGender === 'female' ? 'Male' : 'Female'}
+                  </Text>
+                </TouchableOpacity>
+
                 <TouchableOpacity
                   style={[styles.outlineButton, { borderColor: Colors.textMuted }]}
-                  onPress={() => stopSpeaking()}
+                  onPress={() => {
+                    stopSpeaking();
+                    setIsPlayingVoiceSample(null);
+                  }}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.outlineButtonText, { color: Colors.textMuted }]}>⏹ Stop Voice</Text>
+                  <Text style={[styles.outlineButtonText, { color: Colors.textMuted }]}>⏹ Stop</Text>
                 </TouchableOpacity>
+              </View>
+
+              <View style={[styles.alarmInfoBox, { marginTop: Spacing.md }]}>
+                <Text style={[Typography.caption, { color: Colors.textSecondary, lineHeight: 18 }]}>
+                  💡 <Text style={{ fontWeight: '700' }}>Caregiver Tip:</Text> Many individuals experiencing age-related high-frequency hearing loss find the lower resonance of the Male voice easier to recognize and comprehend.
+                </Text>
               </View>
             </View>
 
@@ -1189,5 +1321,26 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     borderWidth: 1,
     borderColor: Colors.borderLight,
+  },
+  voiceGenderToggleRow: {
+    gap: Spacing.sm,
+    marginVertical: Spacing.xs,
+  },
+  voiceGenderButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Spacing.md,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.surfaceElevated,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+  },
+  voiceGenderButtonActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  voiceGenderEmoji: {
+    fontSize: 26,
+    marginRight: Spacing.md,
   },
 });

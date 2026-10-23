@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Typography, Spacing, Radius, TouchTargets } from '../constants';
 import { ReminderRecord } from '../db/types';
-import { speakCalmly, stopSpeaking, isSpeaking } from '../services/speechService';
+import { playReminderAudio, stopAllAudio } from '../services/audioService';
 import { formatDisplayTime } from './ReminderCard';
 
 export interface VoicePromptModalProps {
@@ -51,15 +51,14 @@ export const VoicePromptModal: React.FC<VoicePromptModalProps> = ({
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Automatically speak the reminder when the modal opens
+  // Automatically speak/play the reminder when the modal opens
   useEffect(() => {
     let isCancelled = false;
 
     if (visible && reminder) {
-      const messageToSpeak = `${reminder.title}. ${reminder.spokenMessage}`;
       setIsPlaying(true);
 
-      speakCalmly(messageToSpeak, {
+      playReminderAudio(reminder, {
         onStart: () => {
           if (!isCancelled) setIsPlaying(true);
         },
@@ -77,23 +76,21 @@ export const VoicePromptModal: React.FC<VoicePromptModalProps> = ({
 
     return () => {
       isCancelled = true;
-      stopSpeaking();
+      stopAllAudio();
       setIsPlaying(false);
     };
   }, [visible, reminder]);
 
   const handleReplayVoice = async () => {
     if (!reminder) return;
-    const speaking = await isSpeaking();
-    if (speaking && isPlaying) {
-      await stopSpeaking();
+    if (isPlaying) {
+      await stopAllAudio();
       setIsPlaying(false);
       return;
     }
 
-    const messageToSpeak = `${reminder.title}. ${reminder.spokenMessage}`;
     setIsPlaying(true);
-    await speakCalmly(messageToSpeak, {
+    await playReminderAudio(reminder, {
       onStart: () => setIsPlaying(true),
       onDone: () => setIsPlaying(false),
       onStopped: () => setIsPlaying(false),
@@ -102,13 +99,13 @@ export const VoicePromptModal: React.FC<VoicePromptModalProps> = ({
   };
 
   const handleAcknowledgePress = async () => {
-    await stopSpeaking();
+    await stopAllAudio();
     setIsPlaying(false);
     onAcknowledge(reminder);
   };
 
   const handleDismissPress = async () => {
-    await stopSpeaking();
+    await stopAllAudio();
     setIsPlaying(false);
     if (onDismiss) {
       onDismiss();
@@ -123,6 +120,7 @@ export const VoicePromptModal: React.FC<VoicePromptModalProps> = ({
 
   const { icon, label } = getCategoryIcon(reminder?.category);
   const formattedTime = reminder?.timeOfDay ? formatDisplayTime(reminder.timeOfDay) : '';
+  const hasVoiceNote = !!(reminder?.audioUri && reminder.audioUri.trim().length > 0);
 
   return (
     <Modal
@@ -169,7 +167,9 @@ export const VoicePromptModal: React.FC<VoicePromptModalProps> = ({
           {/* Voice Speaking Status Indicator */}
           <View style={styles.speechStatusRow}>
             <Text style={[Typography.caption, { color: isPlaying ? Colors.accentWarm : Colors.textMuted }]}>
-              {isPlaying ? '🔊 Speaking instruction...' : 'Tap below to listen again or confirm'}
+              {isPlaying
+                ? (hasVoiceNote ? '🎙️ Playing family voice note...' : '🔊 Speaking instruction...')
+                : 'Tap below to listen again or confirm'}
             </Text>
           </View>
 
@@ -200,9 +200,11 @@ export const VoicePromptModal: React.FC<VoicePromptModalProps> = ({
               accessibilityLabel="Hear spoken reminder again"
               accessibilityRole="button"
             >
-              <Text style={styles.replayIcon}>{isPlaying ? '⏹' : '🔊'}</Text>
+              <Text style={styles.replayIcon}>{isPlaying ? '⏹' : (hasVoiceNote ? '🎙️' : '🔊')}</Text>
               <Text style={[Typography.button, { color: Colors.primary, marginLeft: Spacing.xs + 2 }]}>
-                {isPlaying ? 'Stop Audio' : 'Hear Instruction Again'}
+                {isPlaying
+                  ? 'Stop Audio'
+                  : (hasVoiceNote ? 'Hear Family Voice Again' : 'Hear Instruction Again')}
               </Text>
             </TouchableOpacity>
           </View>

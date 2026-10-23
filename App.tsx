@@ -144,6 +144,7 @@ export default function App() {
       const spokenMessage = (data?.spokenMessage as string) || fallbackBody || 'Time for your daily routine.';
       const category = data?.category || 'hydration';
       const timeOfDay = data?.timeOfDay || '12:00';
+      const audioUri = (data?.audioUri as string) || null;
 
       const record: ReminderRecord = {
         id: reminderId || `rem_temp_${Date.now()}`,
@@ -156,6 +157,7 @@ export default function App() {
         isCompletedToday: 0,
         lastCompletedDate: null,
         notificationId: null,
+        audioUri,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };

@@ -1,4 +1,4 @@
-﻿export interface MemoryRecord {
+export interface MemoryRecord {
   id: string;
   title: string;
   relationship: string;
@@ -23,6 +23,7 @@ export interface ReminderRecord {
   isCompletedToday: number; // 0 or 1
   lastCompletedDate: string | null; // 'YYYY-MM-DD'
   notificationId: string | null;
+  audioUri?: string | null; // Local file path of custom caregiver voice recording (.m4a)
   createdAt: number;
   updatedAt: number;
 }

@@ -29,7 +29,8 @@ Memory Lane was developed specifically as an offline-first, calm, and dignified 
 
 ### B. Audio and Voice Synthesis
 - **Local On-Device Text-to-Speech:** When the app reads aloud memory stories or daily reminder prompts, it utilizes your device's built-in operating system Text-to-Speech (TTS) engine (`expo-speech`).
-- **Zero Audio Transmission:** No audio recordings are made, no microphone permissions are requested, and no spoken text is transmitted to external speech servers.
+- **Caregiver Voice Recordings (Optional):** If a caregiver chooses to record a custom voice notification for a daily routine, the audio recording is stored exclusively in the app's local private sandbox directory (`routine_audio/`).
+- **Zero Audio Transmission:** No audio recordings or voice data are ever transmitted, uploaded to external speech servers, or analyzed by third parties. All voice prompts remain 100% on the device.
 
 ### C. Analytics, Tracking, and Advertising
 - **Zero Third-Party Trackers:** Memory Lane does **not** integrate third-party analytics libraries (such as Google Analytics, Firebase Analytics, Mixpanel, or Facebook SDK).
@@ -44,13 +45,13 @@ Memory Lane strictly adheres to the principle of least privilege, requesting onl
 | Permission | Android Identifier | Purpose & Justification |
 | :--- | :--- | :--- |
 | **Notifications** | `android.permission.POST_NOTIFICATIONS` | **Required on Android 13+ (API level 33+)** strictly to display scheduled daily routine reminders (e.g., medication prompts, meal alerts, hydration reminders) that the caregiver configured. No remote push notifications or external servers are involved. |
+| **Microphone** | `android.permission.RECORD_AUDIO` | **Optional.** Used solely when a caregiver chooses to record a custom voice memo for a daily routine reminder in their own voice and language. Audio recordings are stored 100% locally on the device inside the app's sandboxed storage and are never transmitted, analyzed, or shared. |
 
 ### Permissions We Explicitly DO NOT Request:
 - ❌ **No Internet/Cloud Dependency:** The core functionality functions entirely in Airplane Mode without network connectivity.
 - ❌ **No Camera Permission (`CAMERA`):** The app does not access the camera directly.
 - ❌ **No Storage Access Permission (`READ_EXTERNAL_STORAGE`, `WRITE_EXTERNAL_STORAGE`, `MANAGE_EXTERNAL_STORAGE`):** Memory Lane uses the secure system Photo Picker to let caregivers select images without giving the app broad access to the device file system.
 - ❌ **No Location Permission (`ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`):** The app never tracks or accesses your location.
-- ❌ **No Audio/Microphone Permission (`RECORD_AUDIO`):** The app never listens to or records speech.
 - ❌ **No Exact Alarm Special Permission (`USE_EXACT_ALARM`):** The app avoids high-friction exact alarm permissions, using standard platform scheduling.
 - ❌ **No Contacts, Phone, or SMS Permissions.**
 

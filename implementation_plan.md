@@ -344,6 +344,21 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
   - **Scope**: Verified app icon (`1024x1024`), adaptive icon (`512x512`), and splash screen assets (`1024x1024`) with matching `app.json` configuration. Executed `npx expo prebuild --clean` dry-run and audited generated `AndroidManifest.xml` to verify strict zero-excess permission posture: stripped unwanted permissions (`RECORD_AUDIO`, `SYSTEM_ALERT_WINDOW`) with `blockedPermissions` and confirmed only `POST_NOTIFICATIONS` is active for routine reminder scheduling. Verified zero TypeScript errors (`tsc --noEmit`).
   - **Git Checkpoint**: `git commit -m "chore: verify store assets and finalize play store prebuild audit (Phase 6B)" && git push origin main`
 
+---
+
+### Phase 7: Caregiver Voice Recording & Natural Speech Enhancement
+- **[COMPLETED] Phase 7A: Human-Like Text-to-Speech (Female & Male Voice Selection)**
+  - **Status**: Completed
+  - **Files**: `src/services/speechService.ts`, `src/screens/CaregiverDashboardScreen.tsx`
+  - **Scope**: Upgraded `speechService.ts` to query `Speech.getAvailableVoicesAsync()`, prioritize Enhanced/neural voices, and provide Female (pitch 1.0, gentle) and Male (pitch 0.92, deeper, grounding) options with a calibrated 0.85 dementia-friendly cadence. Added voice selector and sample preview buttons in Caregiver Dashboard Settings, persisting choices in SQLite `app_settings` (`tts_voice_gender`).
+- **[COMPLETED] Phase 7B: Caregiver Custom Voice Recording for Daily Routines**
+  - **Status**: Completed
+  - **Files**: `package.json`, `app.json`, `src/db/types.ts`, `src/db/database.ts`, `src/db/reminderRepository.ts`, `src/services/audioService.ts`, `src/screens/EditReminderScreen.tsx`, `src/components/VoicePromptModal.tsx`, `src/components/ReminderCard.tsx`, `src/screens/PictureFrameScreen.tsx`, `src/services/notificationService.ts`, `App.tsx`
+  - **Scope**: Installed `expo-audio` module and configured microphone permissions with store-compliant descriptions in `app.json`. Migrated SQLite schema to include `audioUri TEXT` on `reminders` table. Created `src/services/audioService.ts` to sandbox `.m4a` files in `FileSystem.documentDirectory + 'routine_audio/'` and manage playback. Added Record 🎙️, Stop ⏹️, Listen ▶️, and Delete 🗑️ controls to `EditReminderScreen.tsx`. Integrated automatic caregiver voice playback across `VoicePromptModal.tsx`, `ReminderCard.tsx`, and `PictureFrameScreen.tsx` with seamless TTS fallback.
+- **[COMPLETED] Phase 7C: Multilingual Support & Caption Polishing**
+  - **Status**: Completed
+  - **Files**: `src/services/speechService.ts`, `PRIVACY_POLICY.md`
+  - **Scope**: Polished `formatMemoryNarration` in `speechService.ts` to prevent awkward hardcoded English prefixes from prepending non-English captions. Updated `PRIVACY_POLICY.md` to document optional microphone usage for local voice memos while maintaining zero cloud/external data transmission. Verified zero TypeScript compilation errors (`tsc --noEmit`).
 
 ---
 
@@ -364,6 +379,12 @@ To keep within chat context limits in Antigravity IDE and ensure rock-solid stab
    - Verify notification triggers on Android device/emulator.
    - Verify in-app TTS speaks the reminder text clearly and audibly.
    - Mark reminder as "Done" and verify daily schedule resets for next cycle.
-3. **Android Submission Check**:
+3. **Android & iOS Submission Check**:
    - Inspect generated `AndroidManifest.xml` via `npx expo prebuild` to confirm no prohibited permissions (`USE_EXACT_ALARM`, `MANAGE_EXTERNAL_STORAGE`, etc.).
    - Verify full offline operation (enable Airplane mode; verify app functions 100% identically).
+4. **Caregiver Voice Recording & Natural Speech TTS (Phase 7)**:
+   - **Voice Gender Selection**: In Caregiver Dashboard Settings, switch between "Female" and "Male" voice options; tap the preview buttons to confirm distinct, warm, human-like voice cadences.
+   - **Voice Memo Recording**: In Edit Reminder, tap `🎙️ Record Voice Memo`, speak a reminder in your own voice/language, observe the live timer, tap `⏹️ Stop Recording`, and preview via `▶️ Listen`.
+   - **Playback in Reminders**: Trigger or tap the reminder on Patient Home (`ReminderCard`), during ambient slideshow (`PictureFrameScreen`), or in `VoicePromptModal` to confirm the caregiver's custom voice memo plays clearly.
+   - **TTS Fallback**: For reminders without recorded audio, verify calm TTS speaks the notification smoothly using the selected gender setting.
+   - **Voice Memo Removal**: In Edit Reminder, tap `🗑️ Remove Recording` to confirm the audio file is deleted and the reminder returns to TTS.

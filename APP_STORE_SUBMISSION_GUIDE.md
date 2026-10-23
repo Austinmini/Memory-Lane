@@ -77,7 +77,7 @@ If you prefer to manually upload:
 2. Click **Apps** > Click the **"+"** button > Select **"New App"**.
 3. Fill in the initial app modal:
    - **Platforms**: Check **iOS** (covers both iPhone & iPad).
-   - **Name**: `Memory Lane - Dementia Care` (or `Memory Lane`)
+   - **Name**: `Memory Lane: Dementia Care` (or `Memory Lane`)
    - **Primary Language**: `English (U.S.)`
    - **Bundle ID**: Select `com.memorylane.carecompanion` (created by EAS or create it in Certificates, Identifiers & Profiles).
    - **SKU**: `memory-lane-ios`
@@ -92,9 +92,9 @@ Navigate to **App Store > iOS App > 1.0 Prepare for Submission**:
 
 ### App Information
 - **Name** (max 30 characters):  
-  `Memory Lane - Dementia Care`
+  `Memory Lane: Dementia Care`
 - **Subtitle** (max 30 characters):  
-  `Loved Ones & Daily Routines`
+  `Alzheimer Daily Routine Frame`
 - **Primary Category**:  
   `Medical` or `Lifestyle` *(Recommended: `Lifestyle` or `Utilities` with the health disclaimer to simplify review)*
 - **Secondary Category (Optional)**:  
@@ -106,10 +106,12 @@ Navigate to **App Store > iOS App > 1.0 Prepare for Submission**:
   A gentle, 100% offline memory photo album and spoken daily routine companion designed with cognitive care principles for seniors, individuals with memory loss, and caregivers.
   ```
 
-- **Keywords** (max 100 characters, comma-separated, no spaces after commas):  
+- **Keywords** (max 100 characters, comma-separated, no spaces after commas — ASO Option A):  
   ```text
-  dementia,alzheimers,memory,caregiver,senior,elderly,routine,reminders,photo album,picture frame
+  caregiver,senior,elderly,reminders,photo,album,clock,calendar,medication,pill,schedule,aging,speech
   ```
+  > [!TIP]
+  > **ASO Combinations Note (Option A):** This setup eliminates all keyword duplication across Title, Subtitle, and Keywords (utilizing 99/100 characters with zero spaces). Apple will algorithmically cross-index search queries such as *dementia caregiver*, *alzheimer routine*, *senior photo album*, *elderly medication reminders*, *daily pill schedule*, *routine clock*, and *dementia calendar*.
 
 - **Support URL**:  
   `https://github.com/Austinmini/Memory-Lane`
@@ -161,10 +163,11 @@ Navigate to **App Review Information** at the bottom of the version page:
 - **Notes for Reviewer**:
   ```text
   Memory Lane is an offline, local-first companion app for dementia care.
-  - All data (photos, memories, daily reminders) is stored entirely in an on-device SQLite database and sandbox.
+  - All data (photos, memories, daily reminders, custom audio memos) is stored entirely in an on-device SQLite database and local sandbox.
   - To access Caregiver Dashboard, either enter the default PIN 1234 or long-press the 'Caregiver' lock button.
-  - The app schedules local notifications and uses iOS text-to-speech to announce daily routine tasks.
-  - Photos are selected via the iOS photo picker or camera to personalize family memory cards.
+  - The app schedules local notifications and uses iOS text-to-speech (or caregiver's recorded voice memos) to announce daily routine tasks.
+  - Microphone access is requested only when a caregiver taps 'Record' to save a custom voice memo for a routine reminder. All recordings remain 100% on the device.
+  - Photos are selected via the iOS photo picker to personalize family memory cards.
   ```
 - **Contact Information**:
   - First & Last Name: Your Name
@@ -180,6 +183,7 @@ Navigate to **App Privacy** in the left sidebar:
 1. Click **Get Started**.
 2. **Do you or your third-party partners collect data from this app?**:
    - Select **"No, we do not collect data from this app"**.
+   > **Note on Audio/Microphone**: Apple's App Privacy policy defines "collection" as transmitting data off the device. Because all caregiver voice recordings and photos stay 100% inside the app's local sandbox and are never uploaded or transmitted, you can truthfully select "No, we do not collect data from this app".
 3. **Privacy Policy URL**:
    - `https://raw.githubusercontent.com/Austinmini/Memory-Lane/main/PRIVACY_POLICY.md`  
    *(or `https://github.com/Austinmini/Memory-Lane/blob/main/PRIVACY_POLICY.md`)*

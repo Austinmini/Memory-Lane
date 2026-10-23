@@ -18,6 +18,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import { Colors, Typography, Spacing, Radius, TouchTargets, resolveMemoryImageSource } from '../constants';
 import { MemoryRecord, ReminderRecord } from '../db/types';
 import { speakCalmly, speakMemory, stopSpeaking } from '../services/speechService';
+import { playReminderAudio, stopAllAudio } from '../services/audioService';
 import {
   addNotificationReceivedListener,
   addNotificationResponseReceivedListener,
@@ -160,8 +161,7 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
 
   const handleSpeakUpcomingReminder = () => {
     if (!upcomingReminder) return;
-    const msg = `Upcoming reminder: ${upcomingReminder.title} at ${formatDisplayTime(upcomingReminder.timeOfDay)}. ${upcomingReminder.spokenMessage}`;
-    speakCalmly(msg);
+    playReminderAudio(upcomingReminder);
   };
 
   // Auto-hide controls after 5 seconds of inactivity
@@ -213,9 +213,8 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
     setReminderSecondsLeft(REMINDER_AUTO_DISMISS_SEC);
     showControlsTemporarily();
 
-    // Speak reminder aloud via English TTS
-    const announcement = `Gentle reminder: ${reminder.title}. ${reminder.spokenMessage}`;
-    speakCalmly(announcement);
+    // Play reminder audio (Caregiver voice recording or TTS fallback)
+    playReminderAudio(reminder);
 
     // Start 60-second auto-dismiss countdown
     if (reminderTimerRef.current) {
@@ -239,11 +238,12 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
       clearInterval(reminderTimerRef.current);
       reminderTimerRef.current = null;
     }
+    stopAllAudio();
     setActiveReminder(null);
   };
 
   const handleAcknowledgeReminder = async () => {
-    stopSpeaking();
+    stopAllAudio();
     if (activeReminder) {
       await onToggleReminder(activeReminder);
     }
@@ -644,10 +644,12 @@ export const PictureFrameScreen: React.FC<PictureFrameScreenProps> = ({
             <View style={styles.reminderActionsRow}>
               <TouchableOpacity
                 style={styles.replayVoiceButton}
-                onPress={() => speakCalmly(activeReminder.spokenMessage)}
+                onPress={() => playReminderAudio(activeReminder)}
                 activeOpacity={0.8}
               >
-                <Text style={styles.replayVoiceText}>🔊 Hear Again</Text>
+                <Text style={styles.replayVoiceText}>
+                  {activeReminder.audioUri ? '🎙️ Hear Family Voice' : '🔊 Hear Again'}
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
