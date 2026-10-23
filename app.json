@@ -68,7 +68,8 @@
         {
           "microphonePermission": "Memory Lane uses your microphone so caregivers can record personalized reminder voice memos in their own voice for loved ones."
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "extra": {
       "eas": {
