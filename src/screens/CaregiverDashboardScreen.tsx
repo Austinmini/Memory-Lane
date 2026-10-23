@@ -354,7 +354,7 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
         {activeTab === 'memories' && (
           <View>
             <View style={styles.sectionHeaderRow}>
-              <View>
+              <View style={styles.sectionHeaderTitleWrap}>
                 <Text style={[Typography.h2, { color: Colors.primary }]}>
                   Family Memories
                 </Text>
@@ -463,12 +463,12 @@ export const CaregiverDashboardScreen: React.FC<CaregiverDashboardScreenProps> =
         {activeTab === 'routines' && (
           <View>
             <View style={styles.sectionHeaderRow}>
-              <View>
+              <View style={styles.sectionHeaderTitleWrap}>
                 <Text style={[Typography.h2, { color: Colors.primary }]}>
                   Daily Routines & Alarms
                 </Text>
                 <Text style={[Typography.caption, { color: Colors.textSecondary }]}>
-                  Times and voice announcements spoken aloud to your loved one.
+                  Times and voice announcements spoken aloud.
                 </Text>
               </View>
 
@@ -1017,6 +1017,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.md,
+    gap: Spacing.sm,
+  },
+  sectionHeaderTitleWrap: {
+    flex: 1,
+    marginRight: Spacing.xs,
   },
   primaryActionButton: {
     backgroundColor: Colors.primary,
@@ -1026,6 +1031,7 @@ const styles = StyleSheet.create({
     minHeight: 46,
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   primaryActionButtonText: {
     ...Typography.button,

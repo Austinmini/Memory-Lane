@@ -651,13 +651,15 @@ export const EditReminderScreen: React.FC<EditReminderScreenProps> = ({
 
         {/* Caregiver Personal Voice Recording Section */}
         <View style={styles.card}>
-          <View style={styles.rowBetween}>
-            <Text style={[Typography.h3, { color: Colors.primary }]}>
-              🎙️ Caregiver Voice Recording
-            </Text>
+          <View style={styles.recordingHeaderRow}>
+            <View style={styles.recordingHeaderTitleWrap}>
+              <Text style={[Typography.h3, { color: Colors.primary }]}>
+                🎙️ Caregiver Voice Recording
+              </Text>
+            </View>
             {audioUri ? (
               <View style={styles.activeAudioPill}>
-                <Text style={styles.activeAudioPillText}>✓ Your Voice Active</Text>
+                <Text style={styles.activeAudioPillText}>✓ Voice Active</Text>
               </View>
             ) : null}
           </View>
@@ -689,47 +691,48 @@ export const EditReminderScreen: React.FC<EditReminderScreenProps> = ({
             </View>
           ) : audioUri ? (
             <View style={styles.audioAttachedBox}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.sm }}>
-                <Text style={{ fontSize: 24, marginRight: Spacing.xs }}>🎧</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.md }}>
+                <Text style={{ fontSize: 26, marginRight: Spacing.sm }}>🎧</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={[Typography.bodyMediumBold, { color: Colors.textPrimary }]}>
                     Personal Voice Clip Attached
                   </Text>
-                  <Text style={[Typography.caption, { color: Colors.textMuted }]}>
-                    This voice clip will play when this routine reminder rings
+                  <Text style={[Typography.caption, { color: Colors.textMuted, marginTop: 2 }]}>
+                    Plays automatically when this routine reminder rings
                   </Text>
                 </View>
               </View>
 
-              <View style={{ flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' }}>
-                <TouchableOpacity
-                  style={[
-                    styles.primaryActionButton,
-                    { flex: 1, minHeight: 46 },
-                    isPlayingAudioClip && { backgroundColor: Colors.accentWarm },
-                  ]}
-                  onPress={handleToggleAudioClipPreview}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.primaryActionButtonText}>
-                    {isPlayingAudioClip ? '⏹ Stop Audio' : '▶ Listen to Recording'}
-                  </Text>
-                </TouchableOpacity>
+              {/* Prominent Hero Listen Button with generous padding inside the oval */}
+              <TouchableOpacity
+                style={[
+                  styles.listenAudioHeroButton,
+                  isPlayingAudioClip && styles.listenAudioHeroButtonPlaying,
+                ]}
+                onPress={handleToggleAudioClipPreview}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.listenAudioHeroButtonText}>
+                  {isPlayingAudioClip ? '⏹ Stop Voice Preview' : '▶ Listen to Recording'}
+                </Text>
+              </TouchableOpacity>
 
+              {/* Secondary Actions Row */}
+              <View style={styles.audioSecondaryActionsRow}>
                 <TouchableOpacity
-                  style={styles.outlineButton}
+                  style={styles.secondaryAudioButton}
                   onPress={handleStartRecording}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.outlineButtonText}>🔄 Re-Record</Text>
+                  <Text style={styles.secondaryAudioButtonText}>🔄 Re-Record</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.outlineButton, { borderColor: Colors.danger }]}
+                  style={[styles.secondaryAudioButton, styles.secondaryAudioButtonDanger]}
                   onPress={handleRemoveAudioClip}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.outlineButtonText, { color: Colors.danger }]}>🗑</Text>
+                  <Text style={styles.secondaryAudioButtonDangerText}>🗑 Remove Voice</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -1012,13 +1015,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginVertical: Spacing.sm,
   },
+  recordingHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+  },
+  recordingHeaderTitleWrap: {
+    flex: 1,
+    marginRight: Spacing.xs,
+  },
   activeAudioPill: {
     backgroundColor: Colors.successLight,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 3,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 5,
     borderRadius: Radius.full,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: Colors.success,
+    alignSelf: 'center',
+    flexShrink: 0,
   },
   activeAudioPillText: {
     ...Typography.caption,
@@ -1063,12 +1078,74 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     padding: Spacing.md,
   },
+  listenAudioHeroButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.full,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: Spacing.lg,
+    minHeight: 52,
+    width: '100%',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  listenAudioHeroButtonPlaying: {
+    backgroundColor: Colors.accentWarm,
+  },
+  listenAudioHeroButtonText: {
+    ...Typography.button,
+    color: Colors.textInverse,
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  audioSecondaryActionsRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginTop: Spacing.sm,
+  },
+  secondaryAudioButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    borderRadius: Radius.full,
+    paddingVertical: 10,
+    paddingHorizontal: Spacing.md,
+    minHeight: 46,
+    backgroundColor: Colors.surfaceElevated,
+  },
+  secondaryAudioButtonDanger: {
+    borderColor: '#F8D7DA',
+    backgroundColor: '#FFF5F5',
+  },
+  secondaryAudioButtonText: {
+    ...Typography.button,
+    color: Colors.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  secondaryAudioButtonDangerText: {
+    ...Typography.button,
+    color: Colors.danger,
+    fontSize: 14,
+    fontWeight: '600',
+  },
   primaryActionButton: {
     backgroundColor: Colors.primary,
     borderRadius: Radius.full,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    minHeight: 46,
   },
   primaryActionButtonText: {
     ...Typography.button,
